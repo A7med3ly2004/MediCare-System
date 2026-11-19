@@ -21,7 +21,7 @@ builder.Services.AddControllersWithViews(options =>
 builder.Services.AddDataLayer(builder.Configuration);
 
 // Register the Services layer (AccountService, etc.)
-builder.Services.AddServicesLayer();
+builder.Services.AddServicesLayer(builder.Configuration);
 
 // ASP.NET Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
