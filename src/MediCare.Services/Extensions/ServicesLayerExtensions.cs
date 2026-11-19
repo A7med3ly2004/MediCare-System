@@ -1,6 +1,7 @@
 using MediCare.Services.Account;
 using MediCare.Services.Email;
 using MediCare.Services.Interfaces;
+using MediCare.Services.Notifications;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,7 @@ public static class ServicesLayerExtensions
     public static IServiceCollection AddServicesLayer(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         var sendGridKey = configuration["SendGrid:ApiKey"];
         if (!string.IsNullOrWhiteSpace(sendGridKey))
