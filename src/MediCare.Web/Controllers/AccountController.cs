@@ -258,7 +258,7 @@ public class AccountController : Controller
         switch (result.Status)
         {
             case OtpStatus.Success:
-                TempData["SuccessMessage"] = "Your email has been verified successfully. Please sign in to continue.";
+                TempData["Success"] = "Your email has been verified successfully. Please sign in to continue.";
                 return RedirectToAction(nameof(Login));
 
             case OtpStatus.WrongCode:
@@ -277,7 +277,7 @@ public class AccountController : Controller
                 return View(model);
 
             case OtpStatus.AlreadyVerified:
-                TempData["InfoMessage"] = "Your email is already verified. Please sign in.";
+                TempData["Info"] = "Your email is already verified. Please sign in.";
                 return RedirectToAction(nameof(Login));
 
             case OtpStatus.UserNotFound:
@@ -296,7 +296,7 @@ public class AccountController : Controller
 
         if (string.IsNullOrWhiteSpace(email))
         {
-            TempData["ErrorMessage"] = "Please provide your email address to resend the code.";
+            TempData["Error"] = "Please provide your email address to resend the code.";
             return RedirectToAction(nameof(VerifyOtp));
         }
 
@@ -306,20 +306,20 @@ public class AccountController : Controller
         switch (result.Status)
         {
             case OtpStatus.Success:
-                TempData["SuccessMessage"] = "A new 6-digit verification code has been sent to your email.";
+                TempData["Success"] = "A new 6-digit verification code has been sent to your email.";
                 break;
 
             case OtpStatus.CooldownActive:
-                TempData["ErrorMessage"] = $"Please wait {result.SecondsRemaining} seconds before requesting a new code.";
+                TempData["Error"] = $"Please wait {result.SecondsRemaining} seconds before requesting a new code.";
                 break;
 
             case OtpStatus.AlreadyVerified:
-                TempData["InfoMessage"] = "Your email address is already verified. Please sign in.";
+                TempData["Info"] = "Your email address is already verified. Please sign in.";
                 return RedirectToAction(nameof(Login));
 
             case OtpStatus.UserNotFound:
             default:
-                TempData["ErrorMessage"] = "If an account exists with this email address, a verification code has been sent.";
+                TempData["Error"] = "If an account exists with this email address, a verification code has been sent.";
                 break;
         }
 

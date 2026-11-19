@@ -1,10 +1,11 @@
 @* _Toasts.cshtml — Renders TempData["Success"] and TempData["Error"] as Bootstrap toasts *@
 @{
-    var successMsg = TempData["Success"] as string;
-    var errorMsg   = TempData["Error"]   as string;
+    var successMsg = (TempData["Success"] ?? TempData["SuccessMessage"]) as string;
+    var errorMsg   = (TempData["Error"]   ?? TempData["ErrorMessage"]) as string;
+    var infoMsg    = (TempData["Info"]    ?? TempData["InfoMessage"]) as string;
 }
 
-@if (!string.IsNullOrEmpty(successMsg) || !string.IsNullOrEmpty(errorMsg))
+@if (!string.IsNullOrEmpty(successMsg) || !string.IsNullOrEmpty(errorMsg) || !string.IsNullOrEmpty(infoMsg))
 {
     <div class="mc-toast-container" aria-live="polite" aria-atomic="true">
         @if (!string.IsNullOrEmpty(successMsg))
@@ -12,6 +13,16 @@
             <div class="mc-toast mc-toast-success" role="alert">
                 <div class="mc-toast-icon"><i class="bi bi-check-circle-fill"></i></div>
                 <div class="mc-toast-body">@successMsg</div>
+                <button type="button" class="mc-toast-close" aria-label="Close">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(infoMsg))
+        {
+            <div class="mc-toast mc-toast-info" role="alert" style="background: var(--mc-primary-light); color: var(--mc-ink); border-left: 4px solid var(--mc-primary);">
+                <div class="mc-toast-icon"><i class="bi bi-info-circle-fill" style="color: var(--mc-confirmed-text);"></i></div>
+                <div class="mc-toast-body">@infoMsg</div>
                 <button type="button" class="mc-toast-close" aria-label="Close">
                     <i class="bi bi-x"></i>
                 </button>
