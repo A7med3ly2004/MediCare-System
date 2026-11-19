@@ -46,6 +46,10 @@ MigrationBundle/
 coverage*/
 *.opencover.xml
 
+# User uploads
+**/wwwroot/uploads/*
+!**/wwwroot/uploads/**/.gitkeep
+
 # OS
 .DS_Store
 Thumbs.db
