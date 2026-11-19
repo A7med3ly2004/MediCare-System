@@ -16,15 +16,18 @@ public class AccountService : IAccountService
 {
     private readonly IUnitOfWork _uow;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IOtpService _otpService;
     private readonly ILogger<AccountService> _logger;
 
     public AccountService(
         IUnitOfWork uow,
         UserManager<ApplicationUser> userManager,
+        IOtpService otpService,
         ILogger<AccountService> logger)
     {
         _uow = uow;
         _userManager = userManager;
+        _otpService = otpService;
         _logger = logger;
     }
 
@@ -79,6 +82,17 @@ public class AccountService : IAccountService
             await _uow.CommitAsync();
 
             _logger.LogInformation("Patient registered: {Email} ({Code})", dto.Email, code);
+
+            // Step 5: Send initial OTP for email verification (registration succeeds even if email delivery fails)
+            try
+            {
+                await _otpService.SendOtpAsync(user.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send initial registration OTP to patient {Email}", dto.Email);
+            }
+
             return ServiceResult.Ok();
         }
         catch (Exception ex)
@@ -135,6 +149,17 @@ public class AccountService : IAccountService
             await _uow.CommitAsync();
 
             _logger.LogInformation("Doctor registered: {Email}", dto.Email);
+
+            // Step 5: Send initial OTP for email verification (registration succeeds even if email delivery fails)
+            try
+            {
+                await _otpService.SendOtpAsync(user.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send initial registration OTP to doctor {Email}", dto.Email);
+            }
+
             return ServiceResult.Ok();
         }
         catch (Exception ex)
