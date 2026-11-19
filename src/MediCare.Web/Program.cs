@@ -51,7 +51,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
@@ -63,7 +63,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Antiforgery cookie configuration
 builder.Services.AddAntiforgery(options =>
 {
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
