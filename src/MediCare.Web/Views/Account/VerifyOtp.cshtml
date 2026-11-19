@@ -1,0 +1,149 @@
+@model MediCare.Web.ViewModels.Account.VerifyOtpViewModel
+@{
+    Layout = "_LayoutAuth";
+    ViewData["Title"] = "Verify Email";
+    var hasEmail = !string.IsNullOrWhiteSpace(Model.Email);
+}
+
+<div class="mc-auth-card text-center" style="max-width: 480px;">
+    <div class="mb-4">
+        <a asp-controller="Home" asp-action="Index" class="mc-auth-logo justify-content-center">
+            <span class="mc-auth-logo-icon">+</span>
+            <span>MediCare</span>
+        </a>
+    </div>
+
+    <div class="my-3">
+        <div class="mx-auto mb-3" style="width: 56px; height: 56px; background-color: var(--mc-primary-light); color: var(--mc-confirmed-text); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px;">
+            <i class="bi bi-shield-check"></i>
+        </div>
+        <h1 class="mc-auth-title">Verify your email</h1>
+        <p class="mc-auth-subtitle mt-2">
+            @if (hasEmail)
+            {
+                <text>We sent a 6-digit verification code to</text><br />
+                <strong class="text-ink">@Model.Email</strong>
+            }
+            else
+            {
+                <text>Enter the 6-digit verification code sent to your email</text>
+            }
+        </p>
+    </div>
+
+    @await Html.PartialAsync("_ValidationSummary")
+
+    <!-- Verify OTP Form -->
+    <form asp-controller="Account" asp-action="VerifyOtp" method="post" class="mt-4" novalidate>
+        @Html.AntiForgeryToken()
+
+        <div class="mc-form-group mb-4 text-start">
+            @if (!hasEmail)
+            {
+                <label asp-for="Email" class="mc-form-label">
+                    Email address <span class="required">*</span>
+                </label>
+                <input asp-for="Email" class="form-control mc-input mb-3" type="email" placeholder="name@example.com" autofocus />
+                <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+            }
+            else
+            {
+                <input type="hidden" asp-for="Email" />
+            }
+
+            <label asp-for="Code" class="mc-form-label text-center d-block">
+                Enter 6-digit code <span class="required">*</span>
+            </label>
+            <div class="d-flex justify-content-center">
+                <input asp-for="Code"
+                       class="form-control mc-input text-center"
+                       type="text"
+                       inputmode="numeric"
+                       pattern="\d{6}"
+                       maxlength="6"
+                       placeholder="••••••"
+                       autocomplete="one-time-code"
+                       style="max-width: 240px; font-size: 26px; font-weight: 700; letter-spacing: 8px; font-family: monospace; height: 48px;"
+                       autofocus="@(hasEmail ? "autofocus" : null)" />
+            </div>
+            <span asp-validation-for="Code" class="text-danger small mt-1 d-block text-center"></span>
+            <small class="text-secondary d-block text-center mt-2" style="font-size: 12px;">
+                Code expires in 10 minutes. 5 failed attempts will lock the code.
+            </small>
+        </div>
+
+        <button type="submit" class="mc-btn mc-btn-primary w-100 py-2 mb-3">
+            Verify &amp; Continue
+        </button>
+    </form>
+
+    <!-- Resend Code Form -->
+    <div class="border-top pt-3 mt-3">
+        <form asp-controller="Account" asp-action="ResendOtp" method="post" id="resendForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="email" value="@Model.Email" />
+
+            <div class="d-flex flex-column align-items-center justify-content-center gap-2">
+                <span class="text-secondary small">Didn't receive the email? Check your spam folder or</span>
+
+                @{
+                    var remaining = Model.CooldownSecondsRemaining ?? 0;
+                    var isCooldown = remaining > 0;
+                }
+
+                <button type="submit"
+                        id="resendBtn"
+                        class="mc-btn mc-btn-ghost btn-sm"
+                        style="font-size: 13px; padding: 6px 14px;"
+                        @(isCooldown || !hasEmail ? "disabled" : "")>
+                    <i class="bi bi-arrow-clockwise me-1"></i> Resend code
+                </button>
+
+                @if (isCooldown)
+                {
+                    <span id="cooldownHint" class="text-muted small" style="font-size: 11px;">
+                        Resend available in <strong id="cooldownTimer">@remaining</strong>s
+                    </span>
+                }
+                else
+                {
+                    <span id="cooldownHint" class="text-muted small d-none" style="font-size: 11px;">
+                        Resend available in <strong id="cooldownTimer">60</strong>s
+                    </span>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="mc-auth-footer mt-4">
+        <a asp-controller="Account" asp-action="Login" class="text-secondary small text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Back to Sign In
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var timerEl = document.getElementById('cooldownTimer');
+            var btnEl = document.getElementById('resendBtn');
+            var hintEl = document.getElementById('cooldownHint');
+
+            if (timerEl && btnEl) {
+                var seconds = parseInt(timerEl.textContent, 10);
+                if (seconds > 0) {
+                    var interval = setInterval(function () {
+                        seconds--;
+                        if (seconds <= 0) {
+                            clearInterval(interval);
+                            btnEl.removeAttribute('disabled');
+                            if (hintEl) hintEl.classList.add('d-none');
+                        } else {
+                            timerEl.textContent = seconds;
+                        }
+                    }, 1000);
+                }
+            }
+        })();
+    </script>
+}

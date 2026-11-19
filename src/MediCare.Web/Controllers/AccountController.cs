@@ -14,6 +14,7 @@ namespace MediCare.Web.Controllers;
 public class AccountController : Controller
 {
     private readonly IAccountService _accountService;
+    private readonly IOtpService _otpService;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ApplicationDbContext _dbContext;
@@ -26,6 +27,7 @@ public class AccountController : Controller
 
     public AccountController(
         IAccountService accountService,
+        IOtpService otpService,
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
         ApplicationDbContext dbContext,
@@ -33,6 +35,7 @@ public class AccountController : Controller
         ILogger<AccountController> logger)
     {
         _accountService = accountService;
+        _otpService = otpService;
         _signInManager = signInManager;
         _userManager = userManager;
         _dbContext = dbContext;
@@ -95,7 +98,7 @@ public class AccountController : Controller
             return View(model);
         }
 
-        return RedirectToAction(nameof(RegisterPending), new { email = model.Email });
+        return RedirectToAction(nameof(VerifyOtp), new { email = model.Email });
     }
 
     // ── Register Doctor ───────────────────────────────────────────────────────
@@ -181,7 +184,7 @@ public class AccountController : Controller
             return View(model);
         }
 
-        return RedirectToAction(nameof(RegisterPending), new { email = model.Email });
+        return RedirectToAction(nameof(VerifyOtp), new { email = model.Email });
     }
 
     // ── Registration Pending (Email OTP verification placeholder) ─────────────
@@ -194,7 +197,134 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult VerifyEmail(string? email) => RedirectToAction(nameof(RegisterPending), new { email });
+    public IActionResult VerifyEmail(string? email) => RedirectToAction(nameof(VerifyOtp), new { email });
+
+    // ── Email OTP Verification ────────────────────────────────────────────────
+
+    [HttpGet]
+    public async Task<IActionResult> VerifyOtp(string? email)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToRoleDashboard();
+
+        var model = new VerifyOtpViewModel
+        {
+            Email = email?.Trim() ?? string.Empty
+        };
+
+        if (!string.IsNullOrWhiteSpace(model.Email))
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user is not null)
+            {
+                if (user.IsEmailVerified)
+                {
+                    TempData["InfoMessage"] = "Your email address is already verified. Please sign in.";
+                    return RedirectToAction(nameof(Login));
+                }
+
+                var latestCode = await _dbContext.OtpCodes
+                    .Where(o => o.UserId == user.Id)
+                    .OrderByDescending(o => o.CreatedAt)
+                    .FirstOrDefaultAsync();
+
+                if (latestCode is not null)
+                {
+                    var cooldownSec = 60;
+                    var elapsed = DateTime.UtcNow - latestCode.CreatedAt;
+                    if (elapsed.TotalSeconds < cooldownSec)
+                    {
+                        model.CooldownSecondsRemaining = (int)Math.Ceiling(cooldownSec - elapsed.TotalSeconds);
+                    }
+                }
+            }
+        }
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> VerifyOtp(VerifyOtpViewModel model)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToRoleDashboard();
+
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var result = await _otpService.VerifyOtpByEmailAsync(model.Email.Trim().ToLowerInvariant(), model.Code.Trim());
+
+        switch (result.Status)
+        {
+            case OtpStatus.Success:
+                TempData["SuccessMessage"] = "Your email has been verified successfully. Please sign in to continue.";
+                return RedirectToAction(nameof(Login));
+
+            case OtpStatus.WrongCode:
+                ModelState.AddModelError(nameof(model.Code),
+                    $"Invalid verification code. You have {result.AttemptsLeft} attempt(s) remaining.");
+                return View(model);
+
+            case OtpStatus.Expired:
+                ModelState.AddModelError(string.Empty,
+                    "This verification code has expired. Please request a new code below.");
+                return View(model);
+
+            case OtpStatus.Locked:
+                ModelState.AddModelError(string.Empty,
+                    "Too many wrong attempts. This code has been locked. Please request a new code below.");
+                return View(model);
+
+            case OtpStatus.AlreadyVerified:
+                TempData["InfoMessage"] = "Your email is already verified. Please sign in.";
+                return RedirectToAction(nameof(Login));
+
+            case OtpStatus.UserNotFound:
+            default:
+                ModelState.AddModelError(string.Empty, "Unable to verify. Please check the email address or request a new code.");
+                return View(model);
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResendOtp(string email)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToRoleDashboard();
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            TempData["ErrorMessage"] = "Please provide your email address to resend the code.";
+            return RedirectToAction(nameof(VerifyOtp));
+        }
+
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var result = await _otpService.SendOtpByEmailAsync(normalizedEmail);
+
+        switch (result.Status)
+        {
+            case OtpStatus.Success:
+                TempData["SuccessMessage"] = "A new 6-digit verification code has been sent to your email.";
+                break;
+
+            case OtpStatus.CooldownActive:
+                TempData["ErrorMessage"] = $"Please wait {result.SecondsRemaining} seconds before requesting a new code.";
+                break;
+
+            case OtpStatus.AlreadyVerified:
+                TempData["InfoMessage"] = "Your email address is already verified. Please sign in.";
+                return RedirectToAction(nameof(Login));
+
+            case OtpStatus.UserNotFound:
+            default:
+                TempData["ErrorMessage"] = "If an account exists with this email address, a verification code has been sent.";
+                break;
+        }
+
+        return RedirectToAction(nameof(VerifyOtp), new { email = normalizedEmail });
+    }
 
     // ── Login ─────────────────────────────────────────────────────────────────
 
@@ -225,7 +355,11 @@ public class AccountController : Controller
             if (preCheck.IsLockedOut)
                 ModelState.AddModelError(string.Empty, "Account temporarily locked. Please try again later.");
             else if (preCheck.IsUnverified)
+            {
+                ViewBag.ShowVerifyLink = true;
+                ViewBag.UnverifiedEmail = model.Email;
                 ModelState.AddModelError(string.Empty, "Please verify your email address before logging in.");
+            }
             else if (preCheck.IsSuspended)
                 ModelState.AddModelError(string.Empty, "Your account has been suspended. Please contact the clinic.");
             else

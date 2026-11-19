@@ -16,6 +16,20 @@
 
     @await Html.PartialAsync("_ValidationSummary")
 
+    @if (ViewBag.ShowVerifyLink == true)
+    {
+        <div class="mc-alert mc-alert-info mb-3 p-3 rounded" style="background-color: var(--mc-primary-light); border-left: 4px solid var(--mc-primary);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="small text-ink d-block">Your email address has not been verified yet.</span>
+                </div>
+                <a asp-controller="Account" asp-action="VerifyOtp" asp-route-email="@ViewBag.UnverifiedEmail" class="mc-btn mc-btn-primary mc-btn-sm text-nowrap ms-2" style="font-size: 12px; padding: 5px 12px; height: auto;">
+                    Verify now &rarr;
+                </a>
+            </div>
+        </div>
+    }
+
     <form asp-controller="Account" asp-action="Login" method="post" novalidate>
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="ReturnUrl" />
