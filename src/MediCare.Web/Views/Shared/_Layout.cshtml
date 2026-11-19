@@ -1,49 +1,247 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MediCare.Web</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — MediCare" : "MediCare")</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MediCare.Web.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MediCare.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <!-- AUTHENTICATED SHELL: sidebar + topbar + content -->
+    <div class="mc-layout">
+
+        <!-- ═══ SIDEBAR ══════════════════════════════════════════════════════ -->
+        <aside class="mc-sidebar" id="mcSidebar">
+            <!-- Brand -->
+            <div class="mc-sidebar-brand">
+                <div class="mc-brand-icon"><i class="bi bi-plus-lg"></i></div>
+                <span class="mc-brand-name">MediCare</span>
+            </div>
+
+            <!-- Clinic info -->
+            <div class="mc-sidebar-clinic">
+                <p class="mc-clinic-label">AL NOUR CLINIC</p>
+                <p class="mc-clinic-loc"><i class="bi bi-geo-alt"></i> New Cairo, Egypt</p>
+            </div>
+
+            <!-- Navigation links — vary by role -->
+            <nav class="mc-sidebar-nav" aria-label="Main navigation">
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "overview" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Index">
+                        <i class="bi bi-grid-1x2"></i> <span>Overview</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "appointments" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Appointments">
+                        <i class="bi bi-calendar3"></i> <span>Appointments</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "patients" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Patients">
+                        <i class="bi bi-people"></i> <span>Patients</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "doctors" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Doctors">
+                        <i class="bi bi-person-badge"></i> <span>Doctors</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "schedule" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Schedule">
+                        <i class="bi bi-clock"></i> <span>Schedule</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "reports" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Reports">
+                        <i class="bi bi-bar-chart"></i> <span>Reports</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "notifications" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Notifications">
+                        <i class="bi bi-bell"></i> <span>Notifications</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "settings" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Settings">
+                        <i class="bi bi-gear"></i> <span>Settings</span>
+                    </a>
+                }
+                else if (User.IsInRole("Doctor"))
+                {
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "overview" ? "active" : "")"
+                       asp-controller="Doctor" asp-action="Index">
+                        <i class="bi bi-grid-1x2"></i> <span>Overview</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "schedule" ? "active" : "")"
+                       asp-controller="Doctor" asp-action="Schedule">
+                        <i class="bi bi-calendar3"></i> <span>My schedule</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "patients" ? "active" : "")"
+                       asp-controller="Doctor" asp-action="Patients">
+                        <i class="bi bi-people"></i> <span>My patients</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "records" ? "active" : "")"
+                       asp-controller="Doctor" asp-action="MedicalRecords">
+                        <i class="bi bi-file-medical"></i> <span>Medical records</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "messages" ? "active" : "")"
+                       asp-controller="Doctor" asp-action="Messages">
+                        <i class="bi bi-chat"></i> <span>Messages</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "settings" ? "active" : "")"
+                       asp-controller="Doctor" asp-action="Settings">
+                        <i class="bi bi-gear"></i> <span>Settings</span>
+                    </a>
+                }
+                else if (User.IsInRole("Patient"))
+                {
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "overview" ? "active" : "")"
+                       asp-controller="Patient" asp-action="Index">
+                        <i class="bi bi-grid-1x2"></i> <span>Overview</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "appointments" ? "active" : "")"
+                       asp-controller="Patient" asp-action="Appointments">
+                        <i class="bi bi-calendar3"></i> <span>My appointments</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "doctors" ? "active" : "")"
+                       asp-controller="Patient" asp-action="Doctors">
+                        <i class="bi bi-person-badge"></i> <span>Doctors</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "health" ? "active" : "")"
+                       asp-controller="Patient" asp-action="Health">
+                        <i class="bi bi-heart-pulse"></i> <span>My health</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "profile" ? "active" : "")"
+                       asp-controller="Patient" asp-action="Profile">
+                        <i class="bi bi-person"></i> <span>My profile</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "notifications" ? "active" : "")"
+                       asp-controller="Patient" asp-action="Notifications">
+                        <i class="bi bi-bell"></i> <span>Notifications</span>
+                    </a>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "settings" ? "active" : "")"
+                       asp-controller="Patient" asp-action="Settings">
+                        <i class="bi bi-gear"></i> <span>Settings</span>
+                    </a>
+                }
+            </nav>
+
+            <!-- Bottom: support + sign out -->
+            <div class="mc-sidebar-footer">
+                <div class="mc-support-box">
+                    <p class="mc-support-title">A little help, anytime.</p>
+                    <p class="mc-support-sub">Your clinic support team is one message away.</p>
+                    <a href="#" class="mc-support-link">Contact support <i class="bi bi-box-arrow-up-right"></i></a>
                 </div>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="mc-logout-form">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="mc-nav-item mc-logout-btn">
+                        <i class="bi bi-box-arrow-right"></i> <span>Sign out</span>
+                    </button>
+                </form>
+                <p class="mc-sidebar-tagline">MediCare · Clinic workspace</p>
+            </div>
+        </aside>
+
+        <!-- ═══ MAIN: topbar + content ═══════════════════════════════════════ -->
+        <div class="mc-main">
+
+            <!-- TOP BAR -->
+            <header class="mc-topbar">
+                <!-- Mobile hamburger -->
+                <button class="mc-hamburger d-md-none" type="button" aria-label="Toggle sidebar"
+                        onclick="document.getElementById('mcSidebar').classList.toggle('open')">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <!-- Breadcrumb -->
+                <div class="mc-topbar-breadcrumb">
+                    @if (ViewData["PortalLabel"] != null)
+                    {
+                        <span class="mc-breadcrumb-portal">@ViewData["PortalLabel"]</span>
+                        <span class="mc-breadcrumb-sep"> / </span>
+                    }
+                    <span class="mc-breadcrumb-page">@(ViewData["PageLabel"] ?? ViewData["Title"] ?? "Overview")</span>
+                </div>
+
+                <!-- Search bar -->
+                <div class="mc-topbar-search d-none d-lg-flex">
+                    <i class="bi bi-search mc-search-icon"></i>
+                    <input type="search" class="mc-search-input" placeholder="Search patients, doctors…" aria-label="Search" />
+                </div>
+
+                <!-- Right: bell + user chip -->
+                <div class="mc-topbar-right">
+                    <button class="mc-topbar-icon-btn" aria-label="Notifications">
+                        <i class="bi bi-bell"></i>
+                    </button>
+                    <div class="mc-user-chip">
+                        <div class="mc-user-avatar">
+                            @(User.Identity?.Name?.Length > 0 ? User.Identity.Name.Substring(0, 1).ToUpper() : "?")
+                        </div>
+                        <div class="mc-user-info d-none d-lg-block">
+                            <span class="mc-user-name">@User.Identity?.Name</span>
+                            <span class="mc-user-role">
+                                @if (User.IsInRole("Admin")) { <text>Clinic administrator</text> }
+                                else if (User.IsInRole("Doctor")) { <text>Doctor</text> }
+                                else { <text>Patient</text> }
+                            </span>
+                        </div>
+                        <i class="bi bi-chevron-down mc-user-caret d-none d-lg-block"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- PAGE CONTENT -->
+            <main class="mc-content" id="main-content">
+                @await Html.PartialAsync("_Toasts")
+                @RenderBody()
+            </main>
+
+            <!-- FOOTER -->
+            <footer class="mc-page-footer">
+                <span>Al Nour Clinic · New Cairo</span>
+                <span>All times are Cairo local time · GMT+2</span>
+            </footer>
+        </div>
+    </div>
+}
+else
+{
+    <!-- PUBLIC PAGES: simple top navbar -->
+    <div class="mc-public-wrap">
+        <nav class="mc-public-nav">
+            <a class="mc-public-brand" asp-controller="Home" asp-action="Index">
+                <div class="mc-brand-icon-sm"><i class="bi bi-plus-lg"></i></div>
+                <span>MediCare</span>
+            </a>
+            <div class="mc-public-nav-right">
+                <a class="mc-btn mc-btn-ghost" asp-controller="Account" asp-action="Login">Sign in</a>
+                <a class="mc-btn mc-btn-primary" asp-controller="Account" asp-action="Register">Register</a>
             </div>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+        <main id="main-content">
+            @await Html.PartialAsync("_Toasts")
             @RenderBody()
         </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MediCare.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+        <footer class="mc-public-footer">
+            <span>MediCare · Al Nour Clinic</span>
+            <span>All times are Cairo local time · GMT+2</span>
+        </footer>
+    </div>
+}
+
+<!-- Mobile overlay when sidebar open -->
+<div class="mc-sidebar-overlay d-md-none" onclick="document.getElementById('mcSidebar').classList.remove('open')"></div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
