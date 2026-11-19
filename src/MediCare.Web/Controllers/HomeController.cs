@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using MediCare.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCare.Web.Controllers;
@@ -15,8 +17,15 @@ public class HomeController : Controller
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public IActionResult Error(int? statusCode = null)
     {
-        return View();
+        var model = new ErrorViewModel
+        {
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+        };
+
+        ViewData["StatusCode"] = statusCode ?? HttpContext.Response.StatusCode;
+
+        return View(model);
     }
 }

@@ -1,0 +1,132 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Clinic Overview";
+    var totalPatients = ViewBag.TotalPatients as int? ?? 10;
+    var totalDoctors = ViewBag.TotalDoctors as int? ?? 6;
+}
+
+<div class="mc-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <span class="mc-page-label">YOUR CLINIC, AT A GLANCE</span>
+            <h1 class="mc-page-title mb-1">Good morning, Clinic Administrator.</h1>
+            <p class="mc-page-subtitle">A clear view of today's care and clinic operations</p>
+        </div>
+        <div>
+            <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-confirmed-text); font-size: 13px; padding: 8px 14px;">
+                <i class="bi bi-shield-check me-1"></i> Admin Portal Active
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards (UI Match: Admin overview.png) -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="mc-card p-4 h-100">
+            <span class="d-block text-secondary small mb-1">Total registered patients</span>
+            <div class="display-6 fw-bold text-ink mb-1">@totalPatients</div>
+            <span class="text-secondary small">Active clinic records</span>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="mc-card p-4 h-100">
+            <span class="d-block text-secondary small mb-1">Today's appointments</span>
+            <div class="display-6 fw-bold text-ink mb-1">32</div>
+            <span class="text-secondary small">12 completed · 20 remaining</span>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="mc-card p-4 h-100">
+            <span class="d-block text-secondary small mb-1">Active medical staff</span>
+            <div class="display-6 fw-bold text-ink mb-1">@totalDoctors / @totalDoctors</div>
+            <span class="text-secondary small">Across 10 clinic specialties</span>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="mc-card p-4 h-100">
+            <span class="d-block text-secondary small mb-1">Monthly clinic volume</span>
+            <div class="display-6 fw-bold text-ink mb-1" style="font-size: 26px;">168,400 EGP</div>
+            <span class="text-secondary small">October 2026 · +12.4% vs Sep</span>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Appointments Table (UI Match: Admin overview.png) -->
+<div class="mc-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="h6 mb-0 fw-bold text-ink">Upcoming appointments</h2>
+            <span class="text-secondary small">Next scheduled clinical visits for today</span>
+        </div>
+        <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-confirmed-text);">
+            Admin View
+        </span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table mc-table align-middle">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Patient</th>
+                    <th>Attending Doctor</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-semibold">10:30 AM</td>
+                    <td>
+                        <strong class="d-block text-ink">Ahmed Tarek</strong>
+                        <span class="text-secondary small">P-1042 · Follow-up</span>
+                    </td>
+                    <td>
+                        <span class="text-ink">Dr. Mariam Ahmed</span>
+                        <span class="text-secondary small d-block">Cardiology</span>
+                    </td>
+                    <td>
+                        <span class="badge" style="background-color: var(--mc-confirmed-bg); color: var(--mc-confirmed-text);">
+                            Confirmed
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fw-semibold">10:45 AM</td>
+                    <td>
+                        <strong class="d-block text-ink">Menna Adel</strong>
+                        <span class="text-secondary small">P-1186 · Consultation</span>
+                    </td>
+                    <td>
+                        <span class="text-ink">Dr. Omar Hassan</span>
+                        <span class="text-secondary small d-block">Dermatology</span>
+                    </td>
+                    <td>
+                        <span class="badge" style="background-color: var(--mc-pending-bg); color: var(--mc-pending-text);">
+                            Pending
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fw-semibold">11:00 AM</td>
+                    <td>
+                        <strong class="d-block text-ink">Youssef Hany</strong>
+                        <span class="text-secondary small">P-1204 · Follow-up</span>
+                    </td>
+                    <td>
+                        <span class="text-ink">Dr. Salma Mahmoud</span>
+                        <span class="text-secondary small d-block">Pediatrics</span>
+                    </td>
+                    <td>
+                        <span class="badge" style="background-color: var(--mc-confirmed-bg); color: var(--mc-confirmed-text);">
+                            Confirmed
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

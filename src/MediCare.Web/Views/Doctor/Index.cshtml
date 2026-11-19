@@ -1,0 +1,173 @@
+@model MediCare.Data.Entities.Doctor
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Doctor Dashboard";
+    var doctorName = Model?.User?.FullName ?? User.Identity?.Name ?? "Doctor";
+    var specialty = Model?.Specialization?.Name ?? "General Practice";
+    var room = Model?.RoomNumber ?? "Room 02";
+}
+
+<div class="mc-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <span class="mc-page-label">MONDAY AT AL NOUR CLINIC</span>
+            <h1 class="mc-page-title mb-1">Good morning, @doctorName.</h1>
+            <p class="mc-page-subtitle">Your clinical schedule and patient consultation overview</p>
+        </div>
+        <div>
+            <button type="button" class="mc-btn mc-btn-primary" disabled title="Schedule management comes in future task">
+                <i class="bi bi-calendar3 me-1"></i> View my schedule
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Summary Cards (UI Match: Doctor dashboard.png) -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="mc-card p-4 h-100">
+            <span class="d-block text-secondary small mb-1">Today's patients</span>
+            <div class="display-6 fw-bold text-ink mb-1">8</div>
+            <span class="text-secondary small">3 consultations · 5 follow-ups</span>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="mc-card p-4 h-100">
+            <span class="d-block text-secondary small mb-1">Completed visits</span>
+            <div class="display-6 fw-bold text-ink mb-1">3 / 8</div>
+            <span class="text-secondary small">5 patients still to see</span>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="mc-card p-4 h-100">
+            <span class="d-block text-secondary small mb-1">Next consultation</span>
+            <div class="display-6 fw-bold text-ink mb-1">10:30 AM</div>
+            <span class="text-secondary small">Ahmed Tarek · Follow-up</span>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="mc-card p-4 h-100">
+            <span class="d-block text-secondary small mb-1">Specialization</span>
+            <div class="display-6 fw-bold text-ink mb-1" style="font-size: 22px; line-height: 1.4;">@specialty</div>
+            <span class="text-secondary small">Clinic @room</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Section: Today's Schedule Placeholder -->
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        <div class="mc-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="h6 mb-0 fw-bold text-ink">Today's schedule</h2>
+                    <span class="text-secondary small">@specialty · @room · 09:00 AM–03:00 PM</span>
+                </div>
+                <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-confirmed-text);">
+                    Task 2A Placeholder
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table mc-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Patient / Visit</th>
+                            <th>Status</th>
+                            <th>Record</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-semibold">09:00 AM</td>
+                            <td>
+                                <strong class="d-block text-ink">Dina Ashraf</strong>
+                                <span class="text-secondary small">P-1130 · Consultation</span>
+                            </td>
+                            <td>
+                                <span class="badge" style="background-color: var(--mc-completed-bg); color: var(--mc-completed-text);">
+                                    Completed
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-secondary small">View notes</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">10:30 AM</td>
+                            <td>
+                                <strong class="d-block text-ink">Ahmed Tarek</strong>
+                                <span class="text-secondary small">P-1042 · Follow-up</span>
+                            </td>
+                            <td>
+                                <span class="badge" style="background-color: var(--mc-confirmed-bg); color: var(--mc-confirmed-text);">
+                                    Confirmed
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-primary small fw-semibold">Open record</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">12:00 PM</td>
+                            <td>
+                                <strong class="d-block text-ink">Mostafa Nabil</strong>
+                                <span class="text-secondary small">P-1152 · Follow-up</span>
+                            </td>
+                            <td>
+                                <span class="badge" style="background-color: var(--mc-pending-bg); color: var(--mc-pending-text);">
+                                    Pending
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-secondary small">Review</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <!-- Up Next Panel (UI Match: Doctor dashboard.png) -->
+        <div class="mc-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="small text-uppercase fw-bold text-secondary">Up next</span>
+                <span class="text-secondary small">10:30–11:00 AM</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div style="width: 44px; height: 44px; background-color: var(--mc-primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--mc-ink);">
+                    AT
+                </div>
+                <div>
+                    <h3 class="h6 mb-0 fw-bold text-ink">Ahmed Tarek</h3>
+                    <span class="text-secondary small">P-1042 · 38 years · Male</span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <span class="badge me-1" style="background-color: var(--mc-confirmed-bg); color: var(--mc-confirmed-text);">Confirmed</span>
+                <span class="badge" style="background-color: #E8F5E9; color: #388E3C;">Checked in</span>
+            </div>
+
+            <div class="p-3 rounded mb-3" style="background-color: var(--mc-canvas); border: 1px solid var(--mc-hairline);">
+                <span class="d-block text-secondary small">Reason for visit:</span>
+                <strong class="text-ink small">Hypertension follow-up</strong>
+            </div>
+
+            <div class="p-2 rounded mb-3" style="background-color: #FFF3E0; border: 1px solid #FFE0B2; font-size: 12px; color: #E65100;">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Allergy: Penicillin
+            </div>
+
+            <button type="button" class="mc-btn mc-btn-primary w-100" disabled>
+                <i class="bi bi-play-circle me-1"></i> Start consultation (Task 3)
+            </button>
+        </div>
+    </div>
+</div>

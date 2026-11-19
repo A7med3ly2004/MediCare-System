@@ -1,0 +1,63 @@
+@model MediCare.Web.Models.ErrorViewModel
+@{
+    var statusCode = ViewData["StatusCode"] as int? ?? 500;
+    string title;
+    string message;
+    string icon;
+
+    switch (statusCode)
+    {
+        case 404:
+            title = "Page Not Found";
+            message = "The page or clinical resource you were looking for could not be found or has been moved.";
+            icon = "bi-file-earmark-x";
+            break;
+        case 403:
+            title = "Access Forbidden";
+            message = "You do not have the necessary clinical role permissions to access this area.";
+            icon = "bi-shield-slash";
+            break;
+        default:
+            title = "Something Went Wrong";
+            message = "An unexpected error occurred while processing your request. The clinic administration has been informed.";
+            icon = "bi-exclamation-triangle";
+            break;
+    }
+
+    ViewData["Title"] = $"{statusCode} — {title}";
+    Layout = "_LayoutAuth";
+}
+
+<div class="mc-auth-card text-center" style="max-width: 500px;">
+    <div class="mb-4">
+        <a asp-controller="Home" asp-action="Index" class="mc-auth-logo justify-content-center">
+            <span class="mc-auth-logo-icon">+</span>
+            <span>MediCare</span>
+        </a>
+    </div>
+
+    <div class="my-4">
+        <div class="mx-auto mb-3" style="width: 72px; height: 72px; background-color: var(--mc-primary-light); color: var(--mc-ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+            <i class="bi @icon"></i>
+        </div>
+        <div class="badge px-3 py-1 mb-2 rounded-pill" style="background-color: var(--mc-hairline); color: var(--mc-ink); font-size: 13px; font-weight: 600;">
+            Status @statusCode
+        </div>
+        <h1 class="mc-auth-title">@title</h1>
+        <p class="text-secondary small mt-2">
+            @message
+        </p>
+    </div>
+
+    <div class="d-grid gap-2">
+        <a asp-controller="Home" asp-action="Index" class="mc-btn mc-btn-primary">
+            Back to Homepage
+        </a>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a href="javascript:history.back()" class="mc-btn mc-btn-ghost">
+                Go back to previous page
+            </a>
+        }
+    </div>
+</div>
