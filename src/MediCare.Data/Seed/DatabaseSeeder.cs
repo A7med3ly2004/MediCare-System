@@ -143,12 +143,12 @@ public class DatabaseSeeder
 
         var doctorData = new[]
         {
-            new { Email = "mariam.ahmed@medicare.eg",    Name = "Dr. Mariam Ahmed",     SpecName = "Cardiology",    Location = "New Cairo", Fee = 500m, Room = "02" },
-            new { Email = "omar.hassan@medicare.eg",     Name = "Dr. Omar Hassan",      SpecName = "Dermatology",   Location = "Maadi",     Fee = 450m, Room = "05" },
-            new { Email = "salma.mahmoud@medicare.eg",  Name = "Dr. Salma Mahmoud",    SpecName = "Pediatrics",    Location = "Nasr City", Fee = 400m, Room = "08" },
-            new { Email = "ahmed.mostafa@medicare.eg",  Name = "Dr. Ahmed Mostafa",    SpecName = "Orthopedics",   Location = "Heliopolis",Fee = 650m, Room = "03" },
-            new { Email = "nour.ali@medicare.eg",       Name = "Dr. Nour El Din Ali",  SpecName = "Dentistry",     Location = "New Cairo", Fee = 350m, Room = "10" },
-            new { Email = "hana.ibrahim@medicare.eg",   Name = "Dr. Hana Ibrahim",     SpecName = "Neurology",     Location = "Zamalek",   Fee = 600m, Room = "07" },
+            new { OldEmail = "mariam.ahmed@medicare.eg", Email = "mariam.ahmed@example.com", Name = "Dr. Mariam Ahmed", SpecName = "Cardiology", Location = "New Cairo", Fee = 500m, Room = "02" },
+            new { OldEmail = "omar.hassan@medicare.eg", Email = "omar.hassan@example.com", Name = "Dr. Omar Hassan", SpecName = "Dermatology", Location = "Maadi", Fee = 450m, Room = "05" },
+            new { OldEmail = "salma.mahmoud@medicare.eg", Email = "salma.mahmoud@example.com", Name = "Dr. Salma Mahmoud", SpecName = "Pediatrics", Location = "Nasr City", Fee = 400m, Room = "08" },
+            new { OldEmail = "ahmed.mostafa@medicare.eg", Email = "ahmed.mostafa@example.com", Name = "Dr. Ahmed Mostafa", SpecName = "Orthopedics", Location = "Heliopolis", Fee = 650m, Room = "03" },
+            new { OldEmail = "nour.ali@medicare.eg", Email = "nour.ali@example.com", Name = "Dr. Nour El Din Ali", SpecName = "Dentistry", Location = "New Cairo", Fee = 350m, Room = "10" },
+            new { OldEmail = "hana.ibrahim@medicare.eg", Email = "hana.ibrahim@example.com", Name = "Dr. Hana Ibrahim", SpecName = "Neurology", Location = "Zamalek", Fee = 600m, Room = "07" },
         };
 
         // Mon–Sat schedules (1–6)
@@ -156,6 +156,18 @@ public class DatabaseSeeder
 
         foreach (var d in doctorData)
         {
+            // If old seeded user exists with old email, migrate to @example.com
+            var existingOld = await _userManager.FindByEmailAsync(d.OldEmail);
+            if (existingOld is not null)
+            {
+                existingOld.Email = d.Email;
+                existingOld.NormalizedEmail = _userManager.NormalizeEmail(d.Email);
+                existingOld.UserName = d.Email;
+                existingOld.NormalizedUserName = _userManager.NormalizeName(d.Email);
+                await _userManager.UpdateAsync(existingOld);
+                _logger.LogInformation("Migrated doctor email from {OldEmail} to {NewEmail}", d.OldEmail, d.Email);
+            }
+
             if (await _userManager.FindByEmailAsync(d.Email) is not null) continue;
 
             var spec = specs.FirstOrDefault(s => s.Name == d.SpecName);
@@ -220,16 +232,16 @@ public class DatabaseSeeder
         // Use (string?) cast on first element to establish nullable type for the anonymous array
         var patientData = new[]
         {
-            new { Email = "ahmed.tarek@gmail.com",    Name = "Ahmed Tarek",    Phone = "+20 100 123 4567", DOB = new DateTime(1988, 5, 14), Blood = "O+",  History = "Essential hypertension", Allergies = (string?)"Penicillin" },
-            new { Email = "menna.adel@gmail.com",     Name = "Menna Adel",     Phone = "+20 101 246 8101", DOB = new DateTime(1997, 3, 22), Blood = "A+",  History = "None",                    Allergies = (string?)null },
-            new { Email = "youssef.hany@gmail.com",   Name = "Youssef Hany",   Phone = "+20 102 336 7741", DOB = new DateTime(2018, 7, 5),  Blood = "B+",  History = "None",                    Allergies = (string?)null },
-            new { Email = "farida.m@gmail.com",       Name = "Farida Mohamed", Phone = "+20 100 778 4432", DOB = new DateTime(1972, 11, 3), Blood = "AB+", History = "Type 2 diabetes",          Allergies = (string?)"Aspirin" },
-            new { Email = "khaled.ibrahim@gmail.com", Name = "Khaled Ibrahim", Phone = "+20 109 446 2210", DOB = new DateTime(1983, 9, 17), Blood = "O-",  History = "None",                    Allergies = (string?)null },
-            new { Email = "reem.hussein@gmail.com",   Name = "Reem Hussein",   Phone = "+20 101 776 5502", DOB = new DateTime(1990, 1, 30), Blood = "A-",  History = "Asthma",                  Allergies = (string?)"NSAIDs" },
-            new { Email = "dina.ashraf@gmail.com",    Name = "Dina Ashraf",    Phone = "+20 102 667 3320", DOB = new DateTime(1978, 6, 12), Blood = "B-",  History = "None",                    Allergies = (string?)null },
-            new { Email = "mahmoud.saad@gmail.com",   Name = "Mahmoud Saad",   Phone = "+20 100 443 8861", DOB = new DateTime(1963, 4, 8),  Blood = "O+",  History = "Coronary artery disease",  Allergies = (string?)"Sulfa" },
-            new { Email = "sara.hassan@gmail.com",    Name = "Sara Hassan",    Phone = "+20 103 554 9912", DOB = new DateTime(1995, 8, 20), Blood = "AB-", History = "None",                    Allergies = (string?)null },
-            new { Email = "omar.fathy@gmail.com",     Name = "Omar Fathy",     Phone = "+20 109 112 3344", DOB = new DateTime(2001, 12, 1), Blood = "A+",  History = "None",                    Allergies = (string?)null },
+            new { OldEmail = "ahmed.tarek@gmail.com",    Email = "ahmed.tarek@example.com",    Name = "Ahmed Tarek",    Phone = "+20 100 123 4567", DOB = new DateTime(1988, 5, 14), Blood = "O+",  History = "Essential hypertension", Allergies = (string?)"Penicillin" },
+            new { OldEmail = "menna.adel@gmail.com",     Email = "menna.adel@example.com",     Name = "Menna Adel",     Phone = "+20 101 246 8101", DOB = new DateTime(1997, 3, 22), Blood = "A+",  History = "None",                    Allergies = (string?)null },
+            new { OldEmail = "youssef.hany@gmail.com",   Email = "youssef.hany@example.com",   Name = "Youssef Hany",   Phone = "+20 102 336 7741", DOB = new DateTime(2018, 7, 5),  Blood = "B+",  History = "None",                    Allergies = (string?)null },
+            new { OldEmail = "farida.m@gmail.com",       Email = "farida.m@example.com",       Name = "Farida Mohamed", Phone = "+20 100 778 4432", DOB = new DateTime(1972, 11, 3), Blood = "AB+", History = "Type 2 diabetes",          Allergies = (string?)"Aspirin" },
+            new { OldEmail = "khaled.ibrahim@gmail.com", Email = "khaled.ibrahim@example.com", Name = "Khaled Ibrahim", Phone = "+20 109 446 2210", DOB = new DateTime(1983, 9, 17), Blood = "O-",  History = "None",                    Allergies = (string?)null },
+            new { OldEmail = "reem.hussein@gmail.com",   Email = "reem.hussein@example.com",   Name = "Reem Hussein",   Phone = "+20 101 776 5502", DOB = new DateTime(1990, 1, 30), Blood = "A-",  History = "Asthma",                  Allergies = (string?)"NSAIDs" },
+            new { OldEmail = "dina.ashraf@gmail.com",    Email = "dina.ashraf@example.com",    Name = "Dina Ashraf",    Phone = "+20 102 667 3320", DOB = new DateTime(1978, 6, 12), Blood = "B-",  History = "None",                    Allergies = (string?)null },
+            new { OldEmail = "mahmoud.saad@gmail.com",   Email = "mahmoud.saad@example.com",   Name = "Mahmoud Saad",   Phone = "+20 100 443 8861", DOB = new DateTime(1963, 4, 8),  Blood = "O+",  History = "Coronary artery disease",  Allergies = (string?)"Sulfa" },
+            new { OldEmail = "sara.hassan@gmail.com",    Email = "sara.hassan@example.com",    Name = "Sara Hassan",    Phone = "+20 103 554 9912", DOB = new DateTime(1995, 8, 20), Blood = "AB-", History = "None",                    Allergies = (string?)null },
+            new { OldEmail = "omar.fathy@gmail.com",     Email = "omar.fathy@example.com",     Name = "Omar Fathy",     Phone = "+20 109 112 3344", DOB = new DateTime(2001, 12, 1), Blood = "A+",  History = "None",                    Allergies = (string?)null },
         };
 
         // Get the max patient ID to generate codes
@@ -240,6 +252,18 @@ public class DatabaseSeeder
 
         foreach (var pd in patientData)
         {
+            // If old seeded user exists with old email, migrate to @example.com
+            var existingOld = await _userManager.FindByEmailAsync(pd.OldEmail);
+            if (existingOld is not null)
+            {
+                existingOld.Email = pd.Email;
+                existingOld.NormalizedEmail = _userManager.NormalizeEmail(pd.Email);
+                existingOld.UserName = pd.Email;
+                existingOld.NormalizedUserName = _userManager.NormalizeName(pd.Email);
+                await _userManager.UpdateAsync(existingOld);
+                _logger.LogInformation("Migrated patient email from {OldEmail} to {NewEmail}", pd.OldEmail, pd.Email);
+            }
+
             if (await _userManager.FindByEmailAsync(pd.Email) is not null) continue;
 
             var user = new ApplicationUser
