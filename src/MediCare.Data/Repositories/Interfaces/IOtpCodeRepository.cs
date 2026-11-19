@@ -10,4 +10,7 @@ public interface IOtpCodeRepository : IRepository<OtpCode>
 
     /// <summary>Invalidate all unused OTPs for a user (before issuing a new one).</summary>
     Task InvalidateAllForUserAsync(string userId, CancellationToken ct = default);
+
+    /// <summary>Get the most recent OTP record for a user (used for cooldown and lockout checks).</summary>
+    Task<OtpCode?> GetLatestForUserAsync(string userId, CancellationToken ct = default);
 }

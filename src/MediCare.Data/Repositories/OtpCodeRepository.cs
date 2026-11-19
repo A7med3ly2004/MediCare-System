@@ -26,4 +26,10 @@ public class OtpCodeRepository : Repository<OtpCode>, IOtpCodeRepository
         foreach (var code in codes)
             code.IsUsed = true;
     }
+
+    public async Task<OtpCode?> GetLatestForUserAsync(string userId, CancellationToken ct = default)
+        => await _dbSet
+            .Where(o => o.UserId == userId)
+            .OrderByDescending(o => o.CreatedAt)
+            .FirstOrDefaultAsync(ct);
 }

@@ -47,8 +47,18 @@ public interface IOtpService
     Task<OtpSendResult> SendOtpAsync(string userId);
 
     /// <summary>
+    /// Convenience overload to send OTP by user's email address.
+    /// </summary>
+    Task<OtpSendResult> SendOtpByEmailAsync(string email);
+
+    /// <summary>
     /// Verifies the plain 6-digit code against the stored hash in constant time.
     /// On success sets IsEmailVerified = true, EmailConfirmed = true, and marks code used.
     /// </summary>
     Task<OtpVerifyResult> VerifyOtpAsync(string userId, string plainCode);
+
+    /// <summary>
+    /// Convenience overload to verify OTP by user's email address.
+    /// </summary>
+    Task<OtpVerifyResult> VerifyOtpByEmailAsync(string email, string plainCode);
 }
