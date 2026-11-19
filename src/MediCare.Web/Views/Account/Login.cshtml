@@ -1,0 +1,59 @@
+@model MediCare.Web.ViewModels.Account.LoginViewModel
+@{
+    Layout = "_LayoutAuth";
+    ViewData["Title"] = "Sign In";
+}
+
+<div class="mc-auth-card">
+    <div class="text-center mb-4">
+        <a asp-controller="Home" asp-action="Index" class="mc-auth-logo justify-content-center">
+            <span class="mc-auth-logo-icon">+</span>
+            <span>MediCare</span>
+        </a>
+        <h1 class="mc-auth-title mt-2">Welcome back</h1>
+        <p class="mc-auth-subtitle">Sign in to your clinic portal</p>
+    </div>
+
+    @await Html.PartialAsync("_ValidationSummary")
+
+    <form asp-controller="Account" asp-action="Login" method="post" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div class="mc-form-group mb-3">
+            <label asp-for="Email" class="mc-form-label">
+                Email address <span class="required">*</span>
+            </label>
+            <div class="position-relative">
+                <input asp-for="Email" class="form-control mc-input" type="email" placeholder="name@example.com" autocomplete="email" autofocus />
+            </div>
+            <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+        </div>
+
+        <div class="mc-form-group mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <label asp-for="Password" class="mc-form-label mb-0">
+                    Password <span class="required">*</span>
+                </label>
+            </div>
+            <input asp-for="Password" class="form-control mc-input" type="password" placeholder="••••••••" autocomplete="current-password" />
+            <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+        </div>
+
+        <div class="form-check mb-4">
+            <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMe" />
+            <label asp-for="RememberMe" class="form-check-label text-secondary small" for="rememberMe">
+                Remember me on this device
+            </label>
+        </div>
+
+        <button type="submit" class="mc-btn mc-btn-primary w-100 py-2 mb-3">
+            Sign In
+        </button>
+
+        <div class="mc-auth-footer">
+            Don't have an account?
+            <a asp-controller="Account" asp-action="RoleChoice" class="fw-semibold ms-1">Create one</a>
+        </div>
+    </form>
+</div>

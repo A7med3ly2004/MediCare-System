@@ -1,8 +1,161 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Carefully Designed for Care";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+<section class="py-5" style="background: linear-gradient(180deg, var(--mc-primary-light) 0%, var(--mc-canvas) 100%); border-bottom: 1px solid var(--mc-hairline);">
+    <div class="container py-4">
+        <div class="row align-items-center g-4">
+            <div class="col-12 col-lg-7">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background-color: var(--mc-surface); border: 1px solid var(--mc-hairline); font-size: 12px; color: var(--mc-secondary-text);">
+                    <span class="d-inline-block rounded-circle" style="width: 8px; height: 8px; background-color: var(--mc-sage);"></span>
+                    Al Nour Clinic · New Cairo, Egypt
+                </div>
+                <h1 class="display-5 fw-bold mb-3" style="color: var(--mc-ink); letter-spacing: -0.5px;">
+                    Carefully designed for care.
+                </h1>
+                <p class="lead mb-4" style="color: var(--mc-secondary-text); font-size: 16px; max-width: 580px;">
+                    A calm, precise clinic management and appointment platform for modern healthcare operations. Effortless scheduling for patients, comprehensive tools for doctors.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Admin" asp-action="Index" class="mc-btn mc-btn-primary px-4 py-2">
+                                <i class="bi bi-grid-1x2 me-2"></i> Go to Admin Dashboard
+                            </a>
+                        }
+                        else if (User.IsInRole("Doctor"))
+                        {
+                            <a asp-controller="Doctor" asp-action="Index" class="mc-btn mc-btn-primary px-4 py-2">
+                                <i class="bi bi-calendar-check me-2"></i> Go to Doctor Workspace
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Doctors" asp-action="Index" class="mc-btn mc-btn-primary px-4 py-2">
+                                <i class="bi bi-calendar-plus me-2"></i> Book an Appointment
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="RoleChoice" class="mc-btn mc-btn-primary px-4 py-2">
+                            <i class="bi bi-calendar-plus me-2"></i> Book an Appointment
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="mc-btn mc-btn-ghost px-4 py-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Sign In to Portal
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-5">
+                <!-- Clinic At A Glance KPI Panel -->
+                <div class="mc-card p-4 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div>
+                            <span class="small text-uppercase fw-semibold" style="color: var(--mc-secondary-text); font-size: 11px;">Al Nour Clinic</span>
+                            <h2 class="h6 mb-0 fw-bold text-ink">Today's Practice</h2>
+                        </div>
+                        <span class="mc-badge-confirmed px-2 py-1 rounded small" style="background-color: var(--mc-confirmed-bg); color: var(--mc-confirmed-text); font-size: 11px;">
+                            Active Operations
+                        </span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <div class="p-3 rounded" style="background-color: var(--mc-canvas); border: 1px solid var(--mc-hairline);">
+                                <span class="d-block text-secondary small">Specialties</span>
+                                <strong class="fs-4 text-ink">10</strong>
+                                <span class="d-block text-muted small">Medical disciplines</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 rounded" style="background-color: var(--mc-canvas); border: 1px solid var(--mc-hairline);">
+                                <span class="d-block text-secondary small">Clinic Hours</span>
+                                <strong class="fs-5 text-ink">09:00 - 15:00</strong>
+                                <span class="d-block text-muted small">Mon – Sat</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded mb-3" style="background-color: var(--mc-primary-light);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-geo-alt-fill text-primary"></i>
+                            <strong class="text-ink small">Medical Park 2, North 90th St</strong>
+                        </div>
+                        <p class="text-secondary small mb-0">New Cairo, Cairo Governorate, Egypt</p>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center small text-secondary">
+                        <span><i class="bi bi-telephone me-1"></i> +20 2 2561 0340</span>
+                        <span><i class="bi bi-clock me-1"></i> Cairo GMT+2</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features / Value Prop -->
+<section class="py-5">
+    <div class="container py-3">
+        <div class="text-center mb-5">
+            <span class="small text-uppercase fw-bold" style="color: var(--mc-secondary-text); font-size: 11px; letter-spacing: 1px;">Built For Every Role</span>
+            <h2 class="h3 fw-bold mt-1 text-ink">Modern Healthcare, Simplified</h2>
+            <p class="text-secondary mx-auto" style="max-width: 600px;">
+                Designed specifically for Egyptian clinics with role-based workflows for Patients, Doctors, and Clinic Administrators.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-md-4">
+                <div class="mc-card p-4 h-100">
+                    <div class="mb-3" style="width: 44px; height: 44px; background-color: var(--mc-primary-light); color: var(--mc-confirmed-text); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                        <i class="bi bi-person-heart"></i>
+                    </div>
+                    <h3 class="h5 fw-semibold text-ink mb-2">Patients</h3>
+                    <p class="text-secondary small mb-3">
+                        Search verified doctors by medical specialty and location. Book appointments in seconds and access clinical visit notes and prescriptions.
+                    </p>
+                    <a asp-controller="Account" asp-action="RegisterPatient" class="text-decoration-none small fw-semibold" style="color: var(--mc-confirmed-text);">
+                        Register as Patient <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="mc-card p-4 h-100">
+                    <div class="mb-3" style="width: 44px; height: 44px; background-color: #E8F5E9; color: #388E3C; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <h3 class="h5 fw-semibold text-ink mb-2">Doctors</h3>
+                    <p class="text-secondary small mb-3">
+                        Manage your daily schedule with automated slot generation, review patient records, record consultation vitals, and issue prescriptions in one transaction.
+                    </p>
+                    <a asp-controller="Account" asp-action="RegisterDoctor" class="text-decoration-none small fw-semibold" style="color: #388E3C;">
+                        Register as Doctor <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="mc-card p-4 h-100">
+                    <div class="mb-3" style="width: 44px; height: 44px; background-color: #FFF8E1; color: #E6A817; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h3 class="h5 fw-semibold text-ink mb-2">Administration</h3>
+                    <p class="text-secondary small mb-3">
+                        Real-time clinic overview, appointment confirmation, doctor scheduling conflict detection, patient directory, and operational analytics.
+                    </p>
+                    <a asp-controller="Account" asp-action="Login" class="text-decoration-none small fw-semibold" style="color: #E6A817;">
+                        Admin Portal Login <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

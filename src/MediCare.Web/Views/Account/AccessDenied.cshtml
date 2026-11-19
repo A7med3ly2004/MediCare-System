@@ -1,0 +1,51 @@
+@{
+    Layout = "_LayoutAuth";
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="mc-auth-card text-center" style="max-width: 480px;">
+    <div class="mb-4">
+        <a asp-controller="Home" asp-action="Index" class="mc-auth-logo justify-content-center">
+            <span class="mc-auth-logo-icon">+</span>
+            <span>MediCare</span>
+        </a>
+    </div>
+
+    <div class="my-4">
+        <div class="mx-auto mb-3" style="width: 64px; height: 64px; background-color: var(--mc-cancelled-bg); color: var(--mc-cancelled-text); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+            <i class="bi bi-shield-x"></i>
+        </div>
+        <h1 class="mc-auth-title">Access Denied</h1>
+        <p class="text-secondary small mt-2">
+            You do not have the required permissions or role to view this page.
+        </p>
+    </div>
+
+    <div class="mc-card p-3 bg-light text-start small text-secondary mb-4">
+        <i class="bi bi-info-circle me-1"></i> If you believe this is an error, please contact the clinic administrator or sign in with an account having appropriate access.
+    </div>
+
+    <div class="d-grid gap-2">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a asp-controller="Home" asp-action="Index" class="mc-btn mc-btn-primary">
+                Return to Clinic Portal
+            </a>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-grid">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="mc-btn mc-btn-ghost">
+                    Sign Out
+                </button>
+            </form>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Login" class="mc-btn mc-btn-primary">
+                Sign in with another account
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="mc-btn mc-btn-ghost">
+                Go to Home
+            </a>
+        }
+    </div>
+</div>

@@ -1,0 +1,52 @@
+@{
+    Layout = "_LayoutAuth";
+    ViewData["Title"] = "Choose Account Type";
+}
+
+<div class="mc-auth-card" style="max-width: 560px;">
+    <div class="text-center mb-4">
+        <a asp-controller="Home" asp-action="Index" class="mc-auth-logo justify-content-center">
+            <span class="mc-auth-logo-icon">+</span>
+            <span>MediCare</span>
+        </a>
+        <h1 class="mc-auth-title mt-2">Join MediCare</h1>
+        <p class="mc-auth-subtitle">Select the type of account you wish to create</p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6">
+            <div class="mc-card h-100 p-4 text-center d-flex flex-column align-items-center justify-content-between hover-shadow transition">
+                <div>
+                    <div class="mc-icon-pill mb-3" style="width: 56px; height: 56px; background-color: var(--mc-primary-light); color: var(--mc-confirmed-text); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        <i class="bi bi-person-heart"></i>
+                    </div>
+                    <h2 class="h5 mb-2 fw-semibold text-ink">Patient</h2>
+                    <p class="text-secondary small mb-4">Book consultations, view appointments, and track your clinical care history.</p>
+                </div>
+                <a asp-controller="Account" asp-action="RegisterPatient" class="mc-btn mc-btn-primary w-100">
+                    Register as Patient
+                </a>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6">
+            <div class="mc-card h-100 p-4 text-center d-flex flex-column align-items-center justify-content-between hover-shadow transition">
+                <div>
+                    <div class="mc-icon-pill mb-3" style="width: 56px; height: 56px; background-color: #E8F5E9; color: #388E3C; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        <i class="bi bi-hospital"></i>
+                    </div>
+                    <h2 class="h5 mb-2 fw-semibold text-ink">Doctor</h2>
+                    <p class="text-secondary small mb-4">Manage clinic schedule, patient consultations, and medical records.</p>
+                </div>
+                <a asp-controller="Account" asp-action="RegisterDoctor" class="mc-btn mc-btn-ghost w-100">
+                    Register as Doctor
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="mc-auth-footer">
+        Already have an account?
+        <a asp-controller="Account" asp-action="Login" class="fw-semibold ms-1">Sign in</a>
+    </div>
+</div>
