@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MediCare.Web.Attributes;
 
 namespace MediCare.Web.ViewModels.Account;
 
@@ -35,7 +36,7 @@ public class RegisterPatientViewModel
     [Required(ErrorMessage = "Date of birth is required.")]
     [DataType(DataType.Date)]
     [Display(Name = "Date of birth")]
-    public DateOnly DateOfBirth { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
 
     [StringLength(5, ErrorMessage = "Blood group cannot exceed 5 characters.")]
     [Display(Name = "Blood group")]
@@ -49,7 +50,7 @@ public class RegisterPatientViewModel
     [Display(Name = "Medical history")]
     public string? MedicalHistory { get; set; }
 
-    [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the privacy notice to register.")]
+    [MustBeTrue(ErrorMessage = "You must accept the privacy notice to register.")]
     [Display(Name = "I accept the privacy policy and terms of service")]
     public bool AcceptedPrivacyNotice { get; set; }
 }

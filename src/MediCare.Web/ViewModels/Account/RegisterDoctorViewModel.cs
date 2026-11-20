@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MediCare.Web.Attributes;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -50,7 +51,7 @@ public class RegisterDoctorViewModel
     [Display(Name = "Profile photo (JPG, PNG, WebP — max 2MB)")]
     public IFormFile? ProfileImage { get; set; }
 
-    [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the privacy notice to register.")]
+    [MustBeTrue(ErrorMessage = "You must accept the privacy notice to register.")]
     [Display(Name = "I accept the privacy policy and terms of service")]
     public bool AcceptedPrivacyNotice { get; set; }
 

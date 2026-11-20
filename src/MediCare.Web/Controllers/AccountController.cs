@@ -84,7 +84,7 @@ public class AccountController : Controller
             Email = model.Email.Trim().ToLowerInvariant(),
             Password = model.Password,
             PhoneNumber = string.IsNullOrWhiteSpace(model.PhoneNumber) ? null : model.PhoneNumber.Trim(),
-            DateOfBirth = model.DateOfBirth,
+            DateOfBirth = model.DateOfBirth!.Value,
             BloodGroup = string.IsNullOrWhiteSpace(model.BloodGroup) ? null : model.BloodGroup.Trim(),
             Allergies = string.IsNullOrWhiteSpace(model.Allergies) ? null : model.Allergies.Trim(),
             MedicalHistory = string.IsNullOrWhiteSpace(model.MedicalHistory) ? null : model.MedicalHistory.Trim(),

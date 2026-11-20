@@ -1,3 +1,23 @@
+// jQuery Validation adapters for custom attributes (MustBeTrue, etc.)
+if (typeof jQuery !== 'undefined' && jQuery.validator) {
+    // Adapter for [MustBeTrue]
+    jQuery.validator.addMethod("mustbetrue", function (value, element) {
+        return element.checked;
+    });
+    if (jQuery.validator.unobtrusive) {
+        jQuery.validator.unobtrusive.adapters.addBool("mustbetrue");
+    }
+
+    // Defense-in-depth: patch range validator for checkboxes
+    var origRange = jQuery.validator.methods.range;
+    jQuery.validator.methods.range = function (value, element, param) {
+        if (element.type === "checkbox") {
+            return element.checked;
+        }
+        return origRange.call(this, value, element, param);
+    };
+}
+
 // MediCare Client-side Interactions
 document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('mcSidebar');
