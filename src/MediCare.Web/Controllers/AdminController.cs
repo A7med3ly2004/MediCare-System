@@ -36,7 +36,7 @@ public class AdminController : Controller
     public IActionResult Patients() => RedirectToAction(nameof(Index));
 
     [HttpGet]
-    public IActionResult Doctors() => RedirectToAction(nameof(Index));
+    public IActionResult Doctors() => RedirectToAction("Index", "Doctors");
 
     [HttpGet]
     public IActionResult Schedule() => RedirectToAction(nameof(Index));

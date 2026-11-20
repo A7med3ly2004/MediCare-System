@@ -770,14 +770,16 @@ input, button, select, textarea {
   text-decoration: none;
 }
 
-/* Ghost (outline) */
-.mc-btn-ghost {
+/* Ghost / Secondary (outline) */
+.mc-btn-ghost,
+.mc-btn-secondary {
   background: var(--mc-surface);
   color: var(--mc-ink);
   border-color: var(--mc-hairline);
 }
 
-.mc-btn-ghost:hover:not(:disabled) {
+.mc-btn-ghost:hover:not(:disabled),
+.mc-btn-secondary:hover:not(:disabled) {
   background: var(--mc-primary-light);
   border-color: var(--mc-primary);
   color: var(--mc-ink);
@@ -2027,3 +2029,145 @@ input, button, select, textarea {
   clip: rect(0,0,0,0);
   border: 0;
 }
+
+/* ─────────────────────────────────────────────
+   30. DOCTOR DIRECTORY & PROFILE STYLES
+   ───────────────────────────────────────────── */
+.mc-doctor-card {
+  background: var(--mc-surface);
+  border: 1px solid var(--mc-hairline);
+  border-radius: var(--mc-radius);
+  padding: 24px;
+  box-shadow: var(--mc-shadow-card);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.mc-doctor-card:hover {
+  border-color: #BDE0F5;
+  box-shadow: 0 4px 14px rgba(37,55,71,0.06);
+}
+
+.mc-doctor-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--mc-primary-light);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--mc-ink);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.mc-doctor-avatar--square {
+  width: 88px;
+  height: 88px;
+  border-radius: 8px;
+  font-size: 28px;
+}
+
+.mc-promo-card {
+  background: #F2F9FD;
+  border: 1px solid #D7EDFA;
+  border-radius: var(--mc-radius);
+  padding: 24px;
+}
+
+.mc-day-pill {
+  width: 46px;
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--mc-hairline);
+  border-radius: 6px;
+  background: var(--mc-surface);
+  color: var(--mc-ink);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all .15s ease;
+}
+
+.mc-day-pill__day {
+  font-size: 11px;
+  color: var(--mc-secondary-text);
+  text-transform: uppercase;
+}
+
+.mc-day-pill__num {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--mc-ink);
+  line-height: 1.2;
+}
+
+.mc-day-pill.active,
+.mc-day-pill:hover {
+  border-color: var(--mc-primary);
+  background: var(--mc-primary-light);
+  color: var(--mc-ink);
+  text-decoration: none;
+}
+
+.mc-slot-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mc-ink);
+  background: var(--mc-surface);
+  border: 1px solid var(--mc-hairline);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .15s ease;
+  text-decoration: none;
+}
+
+.mc-slot-btn:hover {
+  border-color: var(--mc-primary);
+  background: var(--mc-primary-light);
+  color: var(--mc-ink);
+  text-decoration: none;
+}
+
+.mc-slot-btn.active {
+  background: var(--mc-primary-light);
+  border-color: var(--mc-primary);
+  font-weight: 600;
+}
+
+.mc-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: var(--mc-canvas);
+  border: 1px solid var(--mc-hairline);
+  font-size: 12px;
+  color: var(--mc-ink);
+}
+
+.mc-back-link {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--mc-secondary-text);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color .15s ease;
+}
+
+.mc-back-link:hover {
+  color: var(--mc-ink);
+  text-decoration: none;
+}
+

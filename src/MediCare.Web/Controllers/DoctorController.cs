@@ -47,5 +47,8 @@ public class DoctorController : Controller
     public IActionResult Messages() => RedirectToAction(nameof(Index));
 
     [HttpGet]
-    public IActionResult Settings() => RedirectToAction(nameof(Index));
+    public IActionResult Profile() => RedirectToAction("Edit", "Doctors");
+
+    [HttpGet]
+    public IActionResult Settings() => RedirectToAction("Edit", "Doctors");
 }
