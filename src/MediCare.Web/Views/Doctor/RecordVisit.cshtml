@@ -1,0 +1,244 @@
+@model MediCare.Web.ViewModels.MedicalRecords.RecordVisitViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = Model.IsEdit ? "Edit Consultation Record" : "Record Consultation Visit";
+}
+
+<div class="mc-page-container pb-5">
+    <div class="mb-3">
+        <a asp-action="Index" class="text-secondary small text-decoration-none fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> BACK TO DASHBOARD
+        </a>
+    </div>
+
+    <div class="mc-page-header mb-4">
+        <h1 class="mc-page-title mb-1">@(Model.IsEdit ? "Edit Consultation Record" : "Record Consultation Visit")</h1>
+        <p class="mc-page-subtitle mb-0">Record clinical vitals, diagnosis, notes and digital prescription for this consultation.</p>
+    </div>
+
+    <!-- Patient & Appointment Clinical Header Context -->
+    <div class="mc-card p-4 mb-4" style="background-color: #F8FBFE; border: 1px solid #D6EBF8;">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-6">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 48px; height: 48px; background-color: var(--mc-primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--mc-ink);">
+                        @(Model.PatientName.Length > 0 ? Model.PatientName.Substring(0, 1) : "P")
+                    </div>
+                    <div>
+                        <h2 class="h6 fw-bold text-ink mb-0">@Model.PatientName</h2>
+                        <span class="text-secondary small">@Model.PatientCode · @Model.PatientAge years · DOB: @Model.DateOfBirth.ToString("dd MMM yyyy")</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 text-md-end">
+                <span class="text-secondary small d-block">
+                    <i class="bi bi-calendar-event me-1"></i> @Model.AppointmentDate.ToString("ddd, dd MMM yyyy") · @Model.FormattedTime
+                </span>
+                <span class="text-secondary small">
+                    <i class="bi bi-geo-alt me-1"></i> Room @(string.IsNullOrEmpty(Model.RoomNumber) ? "02" : Model.RoomNumber) · Dr. @Model.DoctorName
+                </span>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Allergies) || !string.IsNullOrEmpty(Model.MedicalHistory))
+        {
+            <div class="row g-2 mt-2 pt-2 border-top" style="border-color: #D6EBF8 !important;">
+                @if (!string.IsNullOrEmpty(Model.Allergies))
+                {
+                    <div class="col-12 col-md-6">
+                        <span class="badge p-2 w-100 text-start" style="background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2;">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> <strong>Allergy Alert:</strong> @Model.Allergies
+                        </span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.MedicalHistory))
+                {
+                    <div class="col-12 col-md-6">
+                        <span class="text-secondary small d-block">
+                            <strong>Known history:</strong> @Model.MedicalHistory
+                        </span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Main Visit Form -->
+    <div class="mc-card p-4">
+        <form asp-action="RecordVisit" method="post" id="visitForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="AppointmentId" />
+            <input type="hidden" asp-for="MedicalRecordId" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+            <!-- Vitals Row -->
+            <h2 class="h6 fw-bold text-ink mb-3 pb-2 border-bottom">
+                <i class="bi bi-activity text-primary me-1"></i> Patient Vitals
+            </h2>
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-sm-6">
+                    <label asp-for="BloodPressure" class="mc-form-label"></label>
+                    <input asp-for="BloodPressure" class="form-control mc-form-control" placeholder="e.g. 120/80 mmHg" />
+                    <span asp-validation-for="BloodPressure" class="text-danger small"></span>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <label asp-for="HeartRate" class="mc-form-label"></label>
+                    <input asp-for="HeartRate" type="number" class="form-control mc-form-control" placeholder="e.g. 72" min="20" max="300" />
+                    <span asp-validation-for="HeartRate" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Symptoms & Complaint -->
+            <h2 class="h6 fw-bold text-ink mb-3 pb-2 border-bottom">
+                <i class="bi bi-chat-left-dots text-primary me-1"></i> Clinical Evaluation
+            </h2>
+            <div class="mb-3">
+                <label asp-for="Symptoms" class="mc-form-label"></label>
+                <textarea asp-for="Symptoms" class="form-control mc-form-control" rows="3" placeholder="Document patient reported symptoms, duration, and clinical history..."></textarea>
+                <span asp-validation-for="Symptoms" class="text-danger small"></span>
+            </div>
+
+            <!-- Diagnosis (Required) -->
+            <div class="mb-3">
+                <label asp-for="Diagnosis" class="mc-form-label"></label>
+                <input asp-for="Diagnosis" class="form-control mc-form-control" placeholder="e.g. Primary hypertension, moderate / Acute pharyngitis" required />
+                <span asp-validation-for="Diagnosis" class="text-danger small"></span>
+            </div>
+
+            <!-- Treatment Notes -->
+            <div class="mb-4">
+                <label asp-for="TreatmentNotes" class="mc-form-label"></label>
+                <textarea asp-for="TreatmentNotes" class="form-control mc-form-control" rows="3" placeholder="Recommendations, therapy plan, diet, and follow-up guidance..."></textarea>
+                <span asp-validation-for="TreatmentNotes" class="text-danger small"></span>
+            </div>
+
+            <!-- Digital Prescription Section -->
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <h2 class="h6 fw-bold text-ink mb-0">
+                    <i class="bi bi-capsule text-primary me-1"></i> Digital Prescription (Optional)
+                </h2>
+                <button type="button" class="mc-btn mc-btn-secondary mc-btn-sm" onclick="addPrescriptionRow()">
+                    <i class="bi bi-plus-lg me-1"></i> Add medication
+                </button>
+            </div>
+
+            <p class="text-secondary small mb-3">Add medications prescribed during this visit. Each medication requires dosage and frequency.</p>
+
+            <div class="table-responsive mb-4">
+                <table class="table mc-table align-middle" id="prescriptionTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Medication *</th>
+                            <th style="width: 25%;">Dosage *</th>
+                            <th style="width: 25%;">Frequency *</th>
+                            <th style="width: 10%;" class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prescriptionRows">
+                        @for (int i = 0; i < Model.Items.Count; i++)
+                        {
+                            <tr class="prescription-row">
+                                <td>
+                                    <input type="hidden" name="Items[@i].Id" value="@Model.Items[i].Id" />
+                                    <input type="text"
+                                           name="Items[@i].Medication"
+                                           value="@Model.Items[i].Medication"
+                                           class="form-control mc-form-control"
+                                           placeholder="e.g. Amlodipine" />
+                                    <span class="text-danger small field-validation-valid" data-valmsg-for="Items[@i].Medication" data-valmsg-replace="true"></span>
+                                </td>
+                                <td>
+                                    <input type="text"
+                                           name="Items[@i].Dosage"
+                                           value="@Model.Items[i].Dosage"
+                                           class="form-control mc-form-control"
+                                           placeholder="e.g. 5 mg" />
+                                </td>
+                                <td>
+                                    <input type="text"
+                                           name="Items[@i].Frequency"
+                                           value="@Model.Items[i].Frequency"
+                                           class="form-control mc-form-control"
+                                           placeholder="e.g. Once daily after meal" />
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)" title="Remove row">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Submit buttons -->
+            <div class="d-flex align-items-center gap-2 pt-3 border-top">
+                <button type="submit" class="mc-btn mc-btn-primary px-4">
+                    <i class="bi bi-check2-circle me-1"></i> Save visit record & complete appointment
+                </button>
+                <a asp-action="Index" class="mc-btn mc-btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function reindexRows() {
+            var rows = document.querySelectorAll('#prescriptionRows tr.prescription-row');
+            rows.forEach(function (row, idx) {
+                var inputs = row.querySelectorAll('input');
+                inputs.forEach(function (input) {
+                    var name = input.getAttribute('name');
+                    if (name) {
+                        input.setAttribute('name', name.replace(/Items\[\d+\]/, 'Items[' + idx + ']'));
+                    }
+                });
+            });
+        }
+
+        function addPrescriptionRow() {
+            var tbody = document.getElementById('prescriptionRows');
+            var idx = tbody.querySelectorAll('tr.prescription-row').length;
+
+            var tr = document.createElement('tr');
+            tr.className = 'prescription-row';
+            tr.innerHTML = `
+                <td>
+                    <input type="hidden" name="Items[${idx}].Id" value="0" />
+                    <input type="text" name="Items[${idx}].Medication" class="form-control mc-form-control" placeholder="e.g. Amlodipine" />
+                </td>
+                <td>
+                    <input type="text" name="Items[${idx}].Dosage" class="form-control mc-form-control" placeholder="e.g. 5 mg" />
+                </td>
+                <td>
+                    <input type="text" name="Items[${idx}].Frequency" class="form-control mc-form-control" placeholder="e.g. Once daily" />
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)" title="Remove row">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function removeRow(btn) {
+            var tbody = document.getElementById('prescriptionRows');
+            var rows = tbody.querySelectorAll('tr.prescription-row');
+            if (rows.length > 1) {
+                btn.closest('tr').remove();
+                reindexRows();
+            } else {
+                // Clear input values instead of removing the last remaining row
+                var inputs = rows[0].querySelectorAll('input[type="text"]');
+                inputs.forEach(function(i) { i.value = ''; });
+            }
+        }
+    </script>
+}

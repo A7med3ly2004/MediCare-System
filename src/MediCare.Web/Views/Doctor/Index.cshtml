@@ -157,15 +157,15 @@
                                             }
                                             else if (item.Status == MediCare.Data.Entities.AppointmentStatus.Confirmed)
                                             {
-                                                <button type="button" class="mc-btn mc-btn-secondary mc-btn-sm" disabled title="Medical records will be added in Task 6">
-                                                    <i class="bi bi-file-medical me-1"></i> Open record
-                                                </button>
+                                                <a asp-action="RecordVisit" asp-route-appointmentId="@item.Id" class="mc-btn mc-btn-primary mc-btn-sm">
+                                                    <i class="bi bi-file-earmark-medical me-1"></i> Record visit
+                                                </a>
                                             }
                                             else if (item.Status == MediCare.Data.Entities.AppointmentStatus.Completed)
                                             {
-                                                <span class="text-secondary small">
-                                                    <i class="bi bi-check2-circle text-success me-1"></i> View notes
-                                                </span>
+                                                <a asp-action="RecordVisit" asp-route-appointmentId="@item.Id" class="mc-btn mc-btn-secondary mc-btn-sm">
+                                                    <i class="bi bi-file-text me-1"></i> View / edit record
+                                                </a>
                                             }
                                             else
                                             {
@@ -290,9 +290,9 @@
                         <strong class="text-ink small">@(!string.IsNullOrEmpty(next.Notes) ? next.Notes : "General Consultation")</strong>
                     </div>
 
-                    <button type="button" class="mc-btn mc-btn-primary w-100" disabled title="Consultations & Medical Records will be built in Task 6">
+                    <a asp-action="RecordVisit" asp-route-appointmentId="@next.Id" class="mc-btn mc-btn-primary w-100">
                         <i class="bi bi-play-circle me-1"></i> Start consultation
-                    </button>
+                    </a>
                 }
                 else
                 {
@@ -324,8 +324,14 @@
                     </div>
                 </div>
 
-                <div class="mt-4 pt-2">
-                    <a asp-controller="Doctor" asp-action="Schedule" class="mc-btn mc-btn-secondary w-100 mb-2">
+                <div class="mt-4 pt-2 d-flex flex-column gap-2">
+                    <a asp-controller="Doctor" asp-action="Patients" class="mc-btn mc-btn-secondary w-100">
+                        <i class="bi bi-people me-1"></i> My Patients
+                    </a>
+                    <a asp-controller="Doctor" asp-action="MedicalRecords" class="mc-btn mc-btn-secondary w-100">
+                        <i class="bi bi-file-medical me-1"></i> Medical Records
+                    </a>
+                    <a asp-controller="Doctor" asp-action="Schedule" class="mc-btn mc-btn-secondary w-100">
                         <i class="bi bi-calendar-range me-1"></i> Manage Weekly Schedule
                     </a>
                     <a asp-controller="Doctor" asp-action="Profile" class="mc-btn mc-btn-secondary w-100">

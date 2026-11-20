@@ -1,0 +1,71 @@
+@model List<MediCare.Data.Entities.Patient>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "My Patients";
+}
+
+<div class="mc-page-container pb-5">
+    <div class="mc-page-header mb-4">
+        <h1 class="mc-page-title mb-1">My Patients</h1>
+        <p class="mc-page-subtitle mb-0">Patients who have scheduled clinical appointments with you</p>
+    </div>
+
+    <div class="mc-card p-4">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-secondary">
+                <i class="bi bi-people fs-1 d-block mb-2 text-muted"></i>
+                <p class="mb-0 fw-semibold text-ink">No patients registered in your care team yet.</p>
+                <span class="small">Patients will appear here once they book an appointment with you.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table mc-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Code</th>
+                            <th>Phone</th>
+                            <th>Date of Birth</th>
+                            <th>Blood Group</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width: 36px; height: 36px; background-color: var(--mc-primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--mc-ink);">
+                                            @(p.User.FullName.Length > 0 ? p.User.FullName.Substring(0, 1) : "P")
+                                        </div>
+                                        <div>
+                                            <strong class="d-block text-ink">@p.User.FullName</strong>
+                                            <span class="text-secondary small">@p.User.Email</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="fw-semibold">@p.PatientCode</span></td>
+                                <td>@(string.IsNullOrEmpty(p.PhoneNumber) ? "—" : p.PhoneNumber)</td>
+                                <td>@p.DateOfBirth.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <span class="badge" style="background-color: var(--mc-canvas); color: var(--mc-ink); border: 1px solid var(--mc-hairline);">
+                                        @(string.IsNullOrEmpty(p.BloodGroup) ? "Not set" : p.BloodGroup)
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="PatientProfile" asp-route-id="@p.Id" class="mc-btn mc-btn-secondary mc-btn-sm">
+                                        <i class="bi bi-file-earmark-person me-1"></i> View record
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

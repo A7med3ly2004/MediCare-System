@@ -1,0 +1,90 @@
+@model List<MediCare.Data.Entities.MedicalRecord>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Medical Records";
+}
+
+<div class="mc-page-container pb-5">
+    <div class="mc-page-header mb-4">
+        <h1 class="mc-page-title mb-1">Medical Records</h1>
+        <p class="mc-page-subtitle mb-0">Completed clinical consultation records and issued prescriptions</p>
+    </div>
+
+    <div class="mc-card p-4">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-secondary">
+                <i class="bi bi-file-earmark-medical fs-1 d-block mb-2 text-muted"></i>
+                <p class="mb-0 fw-semibold text-ink">No medical records recorded yet.</p>
+                <span class="small">Completed consultation records will appear here.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table mc-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Patient</th>
+                            <th>Diagnosis</th>
+                            <th>Vitals</th>
+                            <th>Prescription</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var rec in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong class="d-block text-ink">@rec.Appointment.AppointmentDate.ToString("ddd, dd MMM yyyy")</strong>
+                                    <span class="text-secondary small">@rec.Appointment.StartTime.ToString(@"hh\:mm") – @rec.Appointment.EndTime.ToString(@"hh\:mm")</span>
+                                </td>
+                                <td>
+                                    <strong class="d-block text-ink">@rec.Appointment.Patient.User.FullName</strong>
+                                    <span class="text-secondary small">@rec.Appointment.Patient.PatientCode</span>
+                                </td>
+                                <td>
+                                    <strong class="text-ink">@rec.Diagnosis</strong>
+                                </td>
+                                <td>
+                                    <span class="small text-secondary d-block">BP: @(rec.BloodPressure ?? "—")</span>
+                                    <span class="small text-secondary">HR: @(rec.HeartRate.HasValue ? $"{rec.HeartRate} bpm" : "—")</span>
+                                </td>
+                                <td>
+                                    @if (rec.Prescription != null && rec.Prescription.Items.Any())
+                                    {
+                                        <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-ink);">
+                                            <i class="bi bi-capsule me-1"></i> @rec.Prescription.Items.Count items
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-secondary small">None</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex align-items-center gap-1">
+                                        <a asp-action="VisitDetails" asp-route-id="@rec.Id" class="mc-btn mc-btn-secondary mc-btn-sm">
+                                            View
+                                        </a>
+                                        <a asp-action="RecordVisit" asp-route-appointmentId="@rec.AppointmentId" class="mc-btn mc-btn-secondary mc-btn-sm" title="Edit record">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (rec.Prescription != null && rec.Prescription.Items.Any())
+                                        {
+                                            <a asp-controller="Prescription" asp-action="Print" asp-route-id="@rec.Id" target="_blank" class="mc-btn mc-btn-secondary mc-btn-sm" title="Print prescription">
+                                                <i class="bi bi-printer"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
