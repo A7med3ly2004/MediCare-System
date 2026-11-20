@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using MediCare.Data;
 using MediCare.Data.Entities;
+using MediCare.Services.Appointments;
 using MediCare.Services.Interfaces;
 using MediCare.Services.Schedule;
 using MediCare.Web.ViewModels.Schedule;
@@ -15,34 +16,120 @@ public class DoctorController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly IScheduleService _scheduleService;
+    private readonly IAppointmentService _appointmentService;
     private readonly ILogger<DoctorController> _logger;
 
     public DoctorController(
         ApplicationDbContext context,
         IScheduleService scheduleService,
+        IAppointmentService appointmentService,
         ILogger<DoctorController> logger)
     {
         _context = context;
         _scheduleService = scheduleService;
+        _appointmentService = appointmentService;
         _logger = logger;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        ViewData["Title"] = "Doctor Portal";
+        ViewData["Title"] = "Doctor Dashboard";
         ViewData["PortalLabel"] = "Doctor portal";
         ViewData["PageLabel"] = "Overview";
         ViewData["ActiveNav"] = "overview";
 
-        var userEmail = User.Identity?.Name;
-        var doctor = await _context.Doctors
-            .AsNoTracking()
-            .Include(d => d.User)
-            .Include(d => d.Specialization)
-            .FirstOrDefaultAsync(d => d.User.Email == userEmail);
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId)) return Challenge();
 
-        return View(doctor);
+        var dashboard = await _appointmentService.GetDoctorDashboardDataAsync(currentUserId);
+        return View(dashboard);
+    }
+
+    // ── POST: /Doctor/Confirm ─────────────────────────────────────────────────
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Confirm(int appointmentId, string? rowVersionBase64)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId)) return Challenge();
+
+        var doctor = await GetCurrentDoctorAsync();
+        if (doctor == null) return NotFound();
+
+        byte[]? rowVersion = !string.IsNullOrEmpty(rowVersionBase64)
+            ? Convert.FromBase64String(rowVersionBase64)
+            : null;
+
+        var dto = new ConfirmRejectDto
+        {
+            AppointmentId = appointmentId,
+            UserId = currentUserId,
+            UserRole = "Doctor",
+            DoctorId = doctor.Id,
+            RowVersion = rowVersion
+        };
+
+        try
+        {
+            await _appointmentService.ConfirmAsync(dto);
+            TempData["Success"] = "Appointment has been confirmed successfully.";
+        }
+        catch (InvalidStateTransitionException ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to confirm appointment {Id}", appointmentId);
+            TempData["Error"] = "An error occurred while confirming the appointment.";
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    // ── POST: /Doctor/Reject ──────────────────────────────────────────────────
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reject(int appointmentId, string? rowVersionBase64, string? reason)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId)) return Challenge();
+
+        var doctor = await GetCurrentDoctorAsync();
+        if (doctor == null) return NotFound();
+
+        byte[]? rowVersion = !string.IsNullOrEmpty(rowVersionBase64)
+            ? Convert.FromBase64String(rowVersionBase64)
+            : null;
+
+        var dto = new ConfirmRejectDto
+        {
+            AppointmentId = appointmentId,
+            UserId = currentUserId,
+            UserRole = "Doctor",
+            DoctorId = doctor.Id,
+            RowVersion = rowVersion
+        };
+
+        try
+        {
+            await _appointmentService.RejectAsync(dto, reason);
+            TempData["Success"] = "Appointment has been declined.";
+        }
+        catch (InvalidStateTransitionException ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to reject appointment {Id}", appointmentId);
+            TempData["Error"] = "An error occurred while declining the appointment.";
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 
     // ── GET: /Doctor/Schedule ─────────────────────────────────────────────────

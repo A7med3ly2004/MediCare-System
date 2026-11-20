@@ -1,0 +1,442 @@
+@model MediCare.Services.Appointments.PatientDashboardDto
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Patient Overview";
+    ViewData["ActiveNav"] = "overview";
+}
+
+<div class="mc-page-container pb-5">
+    <!-- Header Row (UI Match: Patient dashboard.png) -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
+        <div>
+            <span class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold d-block mb-1">YOUR PERSONAL CARE SPACE</span>
+            <h1 class="mc-page-title mb-1">Welcome back, @(Model.PatientName.Split(' ')[0]).</h1>
+            <p class="mc-page-subtitle mb-0">Your appointments, care team and health information, all in one place.</p>
+        </div>
+        <div>
+            <a asp-controller="Doctors" asp-action="Index" class="mc-btn mc-btn-primary px-3">
+                <i class="bi bi-calendar-plus me-1"></i> Book an appointment
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══ 2-COLUMN MAIN CONTENT (UI Match: Patient dashboard.png) ══════════════ -->
+    <div class="row g-4">
+        <!-- ── Left Column (Wide) ──────────────────────────────────────────────── -->
+        <div class="col-12 col-xl-8">
+            <!-- Next Appointment Card -->
+            <div class="mc-card p-4 mb-4" style="background-color: #F8FBFE; border: 1px solid #D6EBF8;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold">YOUR NEXT APPOINTMENT</span>
+                    @if (Model.NextAppointment != null)
+                    {
+                        @if (Model.NextAppointment.Status == MediCare.Data.Entities.AppointmentStatus.Confirmed)
+                        {
+                            <span class="mc-badge mc-badge--confirmed">Confirmed</span>
+                        }
+                        else
+                        {
+                            <span class="mc-badge mc-badge--pending">Pending Confirmation</span>
+                        }
+                    }
+                </div>
+
+                @if (Model.NextAppointment != null)
+                {
+                    var appt = Model.NextAppointment;
+                    <div class="d-flex flex-column flex-sm-row align-items-start gap-4 mb-4">
+                        <!-- Date Block -->
+                        <div class="p-3 rounded text-center" style="background-color: var(--mc-surface); border: 1px solid var(--mc-hairline); min-width: 90px;">
+                            <span class="mc-text-secondary mc-fs-11 text-uppercase fw-bold d-block">
+                                @appt.AppointmentDate.ToString("MMM")
+                            </span>
+                            <span class="mc-text-ink fs-2 fw-bold d-block lh-1 my-1">
+                                @appt.AppointmentDate.Day
+                            </span>
+                            <span class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold d-block">
+                                @appt.AppointmentDate.ToString("ddd")
+                            </span>
+                        </div>
+
+                        <!-- Details -->
+                        <div class="flex-grow-1">
+                            <h2 class="h5 fw-bold text-ink mb-1">
+                                @(appt.AppointmentDate == DateOnly.FromDateTime(DateTime.UtcNow.AddHours(2)) ? "Today, " : "")
+                                @appt.StartTime.ToString(@"hh\:mm")
+                            </h2>
+                            <p class="mc-text-secondary mc-fs-13 mb-2">
+                                @(!string.IsNullOrEmpty(appt.Notes) ? appt.Notes : "General Consultation")
+                            </p>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="mc-avatar mc-avatar--sm">
+                                    @(appt.DoctorName.Length > 0 ? appt.DoctorName.Substring(0, 1) : "D")
+                                </div>
+                                <span class="mc-text-ink mc-fs-13 fw-semibold">Dr. @appt.DoctorName</span>
+                                <span class="mc-text-secondary mc-fs-12">· @appt.SpecializationName</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Meta & Actions Row -->
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 pt-3 border-top" style="border-color: #D6EBF8 !important;">
+                        <div>
+                            <span class="mc-text-secondary mc-fs-12 d-block">
+                                <i class="bi bi-geo-alt me-1"></i> Al Nour Clinic · Room @(string.IsNullOrEmpty(appt.RoomNumber) ? "02" : appt.RoomNumber)
+                            </span>
+                            <span class="mc-text-secondary mc-fs-11">
+                                Fee: <strong class="text-ink">@appt.ConsultationFee.ToString("N0") EGP</strong> (payment due at reception)
+                            </span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            @if (appt.CanCancelOrReschedule)
+                            {
+                                <button type="button"
+                                        class="mc-btn mc-btn-secondary px-3"
+                                        onclick="openRescheduleModal(@appt.Id, @appt.DoctorId, '@appt.DoctorName')">
+                                    Reschedule
+                                </button>
+                                <form asp-action="Cancel" method="post" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="AppointmentId" value="@appt.Id" />
+                                    <button type="submit" class="mc-btn mc-btn-danger px-3">
+                                        Cancel
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="mc-text-secondary mc-fs-12 fst-italic">
+                                    <i class="bi bi-clock me-1"></i> Within 2-hour window (cannot cancel/reschedule)
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-calendar-check fs-2 text-primary d-block mb-2"></i>
+                        <h2 class="h6 fw-bold text-ink mb-1">No upcoming appointments</h2>
+                        <p class="mc-text-secondary mc-fs-13 mb-3">You don't have any scheduled appointments right now.</p>
+                        <a asp-controller="Doctors" asp-action="Index" class="mc-btn mc-btn-primary px-3">
+                            <i class="bi bi-search me-1"></i> Browse Doctors Directory
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <!-- Recent Appointments Table -->
+            <div class="mc-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h6 fw-bold text-ink mb-0">Your appointments</h2>
+                        <p class="mc-text-secondary mc-fs-12 mb-0">Upcoming visits and recent care</p>
+                    </div>
+                    <a asp-action="Appointments" class="mc-link fw-semibold mc-fs-13 text-decoration-none">
+                        View all <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+
+                @if (Model.RecentAppointments.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table mc-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date & time</th>
+                                    <th>Doctor</th>
+                                    <th>Visit notes</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var a in Model.RecentAppointments)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong class="text-ink">@a.AppointmentDate.ToString("dd MMM")</strong>
+                                            <span class="mc-text-secondary mc-fs-12 d-block">@a.StartTime.ToString(@"hh\:mm")</span>
+                                        </td>
+                                        <td>
+                                            <strong class="text-ink">Dr. @a.DoctorName</strong>
+                                            <span class="mc-text-secondary mc-fs-12 d-block">@a.SpecializationName</span>
+                                        </td>
+                                        <td>
+                                            <span class="mc-text-secondary mc-fs-13">
+                                                @(!string.IsNullOrEmpty(a.Notes) ? a.Notes : "Consultation")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @switch (a.Status)
+                                            {
+                                                case MediCare.Data.Entities.AppointmentStatus.Confirmed:
+                                                    <span class="mc-badge mc-badge--confirmed">Confirmed</span>
+                                                    break;
+                                                case MediCare.Data.Entities.AppointmentStatus.Pending:
+                                                    <span class="mc-badge mc-badge--pending">Pending</span>
+                                                    break;
+                                                case MediCare.Data.Entities.AppointmentStatus.Completed:
+                                                    <span class="mc-badge mc-badge--completed">Completed</span>
+                                                    break;
+                                                case MediCare.Data.Entities.AppointmentStatus.Cancelled:
+                                                    <span class="mc-badge mc-badge--cancelled">Cancelled</span>
+                                                    break;
+                                                case MediCare.Data.Entities.AppointmentStatus.Rejected:
+                                                    <span class="mc-badge mc-badge--rejected">Rejected</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            @if (a.CanCancelOrReschedule)
+                                            {
+                                                <div class="d-inline-flex gap-1">
+                                                    <button type="button"
+                                                            class="mc-btn mc-btn-ghost mc-btn-sm"
+                                                            title="Reschedule"
+                                                            onclick="openRescheduleModal(@a.Id, @a.DoctorId, '@a.DoctorName')">
+                                                        <i class="bi bi-calendar2-range"></i>
+                                                    </button>
+                                                    <form asp-action="Cancel" method="post" class="d-inline" onsubmit="return confirm('Cancel this appointment?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="AppointmentId" value="@a.Id" />
+                                                        <button type="submit" class="mc-btn mc-btn-ghost mc-btn-sm text-danger" title="Cancel">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="mc-text-secondary mc-fs-12">—</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="mc-text-secondary mc-fs-13 mb-0">No past or upcoming appointments recorded yet.</p>
+                }
+            </div>
+        </div>
+
+        <!-- ── Right Column (Cards) ────────────────────────────────────────────── -->
+        <div class="col-12 col-xl-4">
+            <!-- Your Care Team Card -->
+            <div class="mc-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h6 fw-bold text-ink mb-0">Your care team</h2>
+                    <a asp-controller="Doctors" asp-action="Index" class="mc-link fw-semibold mc-fs-12 text-decoration-none">
+                        Find a doctor <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                </div>
+
+                @if (Model.RecentAppointments.Any())
+                {
+                    var doc = Model.RecentAppointments.First();
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="mc-doctor-avatar">
+                            @(doc.DoctorName.Length > 0 ? doc.DoctorName.Substring(0, 1) : "D")
+                        </div>
+                        <div>
+                            <h3 class="h6 fw-bold text-ink mb-0">Dr. @doc.DoctorName</h3>
+                            <span class="mc-text-secondary mc-fs-12 d-block">@doc.SpecializationName · Al Nour Clinic</span>
+                            <span class="mc-badge mc-badge--available mt-1" style="font-size: 10px;">Care Provider</span>
+                        </div>
+                    </div>
+                    <a asp-controller="Doctors" asp-action="Details" asp-route-id="@doc.DoctorId" class="mc-btn mc-btn-secondary w-100 text-center">
+                        View doctor profile
+                    </a>
+                }
+                else
+                {
+                    <p class="mc-text-secondary mc-fs-13 mb-3">You haven't consulted a doctor yet.</p>
+                    <a asp-controller="Doctors" asp-action="Index" class="mc-btn mc-btn-secondary w-100 text-center">
+                        Browse all doctors
+                    </a>
+                }
+            </div>
+
+            <!-- Your Information Card -->
+            <div class="mc-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h6 fw-bold text-ink mb-0">Your information</h2>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <span class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold d-block mb-1">Patient ID</span>
+                        <strong class="text-ink mc-fs-14">@Model.PatientCode</strong>
+                    </div>
+                    <div class="col-6">
+                        <span class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold d-block mb-1">Blood group</span>
+                        <strong class="text-ink mc-fs-14">@(string.IsNullOrEmpty(Model.BloodGroup) ? "O+" : Model.BloodGroup)</strong>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <span class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold d-block mb-1">Mobile number</span>
+                    <span class="text-ink mc-fs-13">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "+20 100 000 0000" : Model.PhoneNumber)</span>
+                </div>
+
+                <div class="mb-3">
+                    <span class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold d-block mb-1">Email address</span>
+                    <span class="text-ink mc-fs-13 text-break">@Model.Email</span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Allergies))
+                {
+                    <div class="mb-0">
+                        <span class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold d-block mb-1">Known allergies</span>
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                            <i class="bi bi-exclamation-triangle me-1"></i>@Model.Allergies
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <!-- Care Reminders Card -->
+            <div class="mc-card p-4">
+                <h2 class="h6 fw-bold text-ink mb-2">Care reminders</h2>
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <i class="bi bi-clipboard2-check text-primary mt-1"></i>
+                    <div>
+                        <strong class="mc-text-ink mc-fs-13 d-block">Bring your test logs</strong>
+                        <p class="mc-text-secondary mc-fs-12 mb-0">
+                            Your doctor will review your recent readings or test results during your consultation.
+                        </p>
+                    </div>
+                </div>
+                <p class="mc-text-secondary mc-fs-11 mt-3 pt-2 border-top mb-0" style="border-color: var(--mc-hairline) !important;">
+                    Need assistance? Contact clinic reception at +20 2 2561 0340.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ RESCHEDULE MODAL ═════════════════════════════════════════════════════ -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1" aria-labelledby="rescheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: var(--mc-radius);">
+            <div class="modal-header border-bottom" style="border-color: var(--mc-hairline) !important;">
+                <h5 class="modal-title h6 fw-bold text-ink" id="rescheduleModalLabel">
+                    <i class="bi bi-calendar2-range text-primary me-2"></i> Reschedule Appointment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Reschedule" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="AppointmentId" id="rescheduleApptId" />
+                <input type="hidden" name="DoctorId" id="rescheduleDocId" />
+                <input type="hidden" name="NewDate" id="rescheduleNewDate" />
+                <input type="hidden" name="NewStartTime" id="rescheduleNewStartTime" />
+                <input type="hidden" name="NewEndTime" id="rescheduleNewEndTime" />
+
+                <div class="modal-body p-4">
+                    <p class="mc-text-secondary mc-fs-13 mb-3">
+                        Rescheduling with <strong class="text-ink" id="rescheduleDocName"></strong>. Select a new date and an available slot:
+                    </p>
+
+                    <!-- Date picker -->
+                    <div class="mb-3">
+                        <label class="form-label mc-fs-13 fw-semibold">Choose New Date</label>
+                        <input type="date"
+                               id="rescheduleDatePicker"
+                               min="@DateTime.UtcNow.AddHours(2).ToString("yyyy-MM-dd")"
+                               value="@DateTime.UtcNow.AddHours(2).ToString("yyyy-MM-dd")"
+                               class="form-control"
+                               onchange="loadRescheduleSlots()" />
+                    </div>
+
+                    <!-- Available slots -->
+                    <div class="mb-3">
+                        <label class="form-label mc-fs-13 fw-semibold d-block mb-1">Available Slots</label>
+                        <div class="d-flex flex-wrap gap-2" id="rescheduleSlotsList" style="min-height: 44px;">
+                            <span class="mc-text-secondary mc-fs-12 fst-italic">Pick a date to load slots…</span>
+                        </div>
+                    </div>
+
+                    <p class="mc-text-secondary mc-fs-11 mb-0">
+                        <i class="bi bi-info-circle me-1"></i> Rescheduling releases your previous time slot and resets status to <strong>Pending</strong> confirmation.
+                    </p>
+                </div>
+
+                <div class="modal-footer border-top" style="border-color: var(--mc-hairline) !important;">
+                    <button type="button" class="mc-btn mc-btn-secondary px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="mc-btn mc-btn-primary px-4" id="submitRescheduleBtn" disabled>
+                        Confirm Reschedule
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentRescheduleDocId = null;
+
+        function openRescheduleModal(apptId, docId, docName) {
+            document.getElementById('rescheduleApptId').value = apptId;
+            document.getElementById('rescheduleDocId').value = docId;
+            document.getElementById('rescheduleDocName').textContent = 'Dr. ' + docName;
+            currentRescheduleDocId = docId;
+
+            document.getElementById('submitRescheduleBtn').disabled = true;
+            loadRescheduleSlots();
+
+            const modal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
+            modal.show();
+        }
+
+        async function loadRescheduleSlots() {
+            const dateInput = document.getElementById('rescheduleDatePicker');
+            const list = document.getElementById('rescheduleSlotsList');
+            const submitBtn = document.getElementById('submitRescheduleBtn');
+            submitBtn.disabled = true;
+
+            const selectedDate = dateInput.value;
+            if (!selectedDate || !currentRescheduleDocId) return;
+
+            list.innerHTML = '<span class="mc-text-secondary mc-fs-12 fst-italic">Loading available slots…</span>';
+
+            try {
+                const res = await fetch(`/Schedule/FreeSlots?doctorId=${currentRescheduleDocId}&start=${selectedDate}&end=${selectedDate}`);
+                if (!res.ok) throw new Error('Failed to load slots');
+                const slots = await res.json();
+
+                list.innerHTML = '';
+                if (slots.length === 0) {
+                    list.innerHTML = '<span class="mc-text-secondary mc-fs-12 fst-italic">No free slots on this date.</span>';
+                    return;
+                }
+
+                slots.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'mc-slot-btn';
+                    btn.textContent = s.extendedProps.startTime;
+                    btn.onclick = function () {
+                        document.querySelectorAll('#rescheduleSlotsList .mc-slot-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+
+                        document.getElementById('rescheduleNewDate').value = s.extendedProps.date;
+                        document.getElementById('rescheduleNewStartTime').value = s.extendedProps.startTime;
+                        document.getElementById('rescheduleNewEndTime').value = s.extendedProps.endTime;
+                        submitBtn.disabled = false;
+                    };
+                    list.appendChild(btn);
+                });
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = '<span class="text-danger mc-fs-12">Failed to load slots.</span>';
+            }
+        }
+    </script>
+}

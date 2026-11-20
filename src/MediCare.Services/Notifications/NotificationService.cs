@@ -27,42 +27,53 @@ public class NotificationService : INotificationService
         return await SendAndLogNotificationAsync(userId, toEmail, "Otp", email.Subject, email.HtmlBody);
     }
 
-    // ── STUBS for TASK 5 ─────────────────────────────────────────────────────
-
-    public Task<bool> SendBookingReceivedAsync(string userId, string toEmail, string toName, int appointmentId)
+    public async Task<bool> SendBookingReceivedPatientAsync(
+        string userId, string toEmail, string toName, string doctorName, DateOnly date, TimeSpan startTime, TimeSpan endTime, string? room, decimal fee)
     {
-        // TASK 5: Full implementation
-        throw new NotImplementedException("SendBookingReceivedAsync is a stub for TASK 5.");
+        var email = NotificationFactory.CreateBookingReceivedPatientEmail(toName, doctorName, date, startTime, endTime, room, fee);
+        return await SendAndLogNotificationAsync(userId, toEmail, "BookingReceivedPatient", email.Subject, email.HtmlBody);
     }
 
-    public Task<bool> SendAppointmentConfirmedAsync(string userId, string toEmail, string toName, int appointmentId)
+    public async Task<bool> SendBookingReceivedDoctorAsync(
+        string userId, string toEmail, string doctorName, string patientName, string patientCode, DateOnly date, TimeSpan startTime, TimeSpan endTime, string? notes)
     {
-        // TASK 5: Full implementation
-        throw new NotImplementedException("SendAppointmentConfirmedAsync is a stub for TASK 5.");
+        var email = NotificationFactory.CreateBookingReceivedDoctorEmail(doctorName, patientName, patientCode, date, startTime, endTime, notes);
+        return await SendAndLogNotificationAsync(userId, toEmail, "BookingReceivedDoctor", email.Subject, email.HtmlBody);
     }
 
-    public Task<bool> SendAppointmentRejectedAsync(string userId, string toEmail, string toName, int appointmentId)
+    public async Task<bool> SendAppointmentConfirmedAsync(
+        string userId, string toEmail, string recipientName, string doctorName, DateOnly date, TimeSpan startTime, TimeSpan endTime, string? room)
     {
-        // TASK 5: Full implementation
-        throw new NotImplementedException("SendAppointmentRejectedAsync is a stub for TASK 5.");
+        var email = NotificationFactory.CreateAppointmentConfirmedEmail(recipientName, doctorName, date, startTime, endTime, room);
+        return await SendAndLogNotificationAsync(userId, toEmail, "AppointmentConfirmed", email.Subject, email.HtmlBody);
     }
 
-    public Task<bool> SendAppointmentCancelledAsync(string userId, string toEmail, string toName, int appointmentId)
+    public async Task<bool> SendAppointmentRejectedAsync(
+        string userId, string toEmail, string recipientName, string doctorName, DateOnly date, TimeSpan startTime, TimeSpan endTime, string? reason)
     {
-        // TASK 5: Full implementation
-        throw new NotImplementedException("SendAppointmentCancelledAsync is a stub for TASK 5.");
+        var email = NotificationFactory.CreateAppointmentRejectedEmail(recipientName, doctorName, date, startTime, endTime, reason);
+        return await SendAndLogNotificationAsync(userId, toEmail, "AppointmentRejected", email.Subject, email.HtmlBody);
     }
 
-    public Task<bool> SendAppointmentRescheduledAsync(string userId, string toEmail, string toName, int appointmentId)
+    public async Task<bool> SendAppointmentCancelledAsync(
+        string userId, string toEmail, string recipientName, string otherPartyName, DateOnly date, TimeSpan startTime, TimeSpan endTime, string cancelledBy)
     {
-        // TASK 5: Full implementation
-        throw new NotImplementedException("SendAppointmentRescheduledAsync is a stub for TASK 5.");
+        var email = NotificationFactory.CreateAppointmentCancelledEmail(recipientName, otherPartyName, date, startTime, endTime, cancelledBy);
+        return await SendAndLogNotificationAsync(userId, toEmail, "AppointmentCancelled", email.Subject, email.HtmlBody);
     }
 
-    public Task<bool> SendReminderAsync(string userId, string toEmail, string toName, int appointmentId)
+    public async Task<bool> SendAppointmentRescheduledAsync(
+        string userId, string toEmail, string recipientName, string otherPartyName, DateOnly newDate, TimeSpan newStartTime, TimeSpan newEndTime)
     {
-        // TASK 5: Full implementation
-        throw new NotImplementedException("SendReminderAsync is a stub for TASK 5.");
+        var email = NotificationFactory.CreateAppointmentRescheduledEmail(recipientName, otherPartyName, newDate, newStartTime, newEndTime);
+        return await SendAndLogNotificationAsync(userId, toEmail, "AppointmentRescheduled", email.Subject, email.HtmlBody);
+    }
+
+    public async Task<bool> SendReminderAsync(
+        string userId, string toEmail, string recipientName, string doctorName, DateOnly date, TimeSpan startTime, TimeSpan endTime, string? room)
+    {
+        var email = NotificationFactory.CreateReminderEmail(recipientName, doctorName, date, startTime, endTime, room);
+        return await SendAndLogNotificationAsync(userId, toEmail, "AppointmentReminder", email.Subject, email.HtmlBody);
     }
 
     private async Task<bool> SendAndLogNotificationAsync(

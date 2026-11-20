@@ -1,173 +1,392 @@
-@model MediCare.Data.Entities.Doctor
+@model MediCare.Services.Appointments.DoctorDashboardDto
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Doctor Dashboard";
-    var doctorName = Model?.User?.FullName ?? User.Identity?.Name ?? "Doctor";
-    var specialty = Model?.Specialization?.Name ?? "General Practice";
-    var room = Model?.RoomNumber ?? "Room 02";
+    var doctorName = !string.IsNullOrEmpty(Model.DoctorName) ? Model.DoctorName : (User.Identity?.Name ?? "Doctor");
+    var specialty = !string.IsNullOrEmpty(Model.SpecializationName) ? Model.SpecializationName : "General Practice";
+    var room = !string.IsNullOrEmpty(Model.RoomNumber) ? Model.RoomNumber : "Room 02";
+    var dayLabel = DateTime.Today.ToString("dddd").ToUpperInvariant();
 }
 
-<div class="mc-page-header mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <span class="mc-page-label">MONDAY AT AL NOUR CLINIC</span>
-            <h1 class="mc-page-title mb-1">Good morning, @doctorName.</h1>
-            <p class="mc-page-subtitle">Your clinical schedule and patient consultation overview</p>
-        </div>
-        <div>
-            <button type="button" class="mc-btn mc-btn-primary" disabled title="Schedule management comes in future task">
-                <i class="bi bi-calendar3 me-1"></i> View my schedule
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- KPI Summary Cards (UI Match: Doctor dashboard.png) -->
-<div class="row g-3 mb-4">
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="mc-card p-4 h-100">
-            <span class="d-block text-secondary small mb-1">Today's patients</span>
-            <div class="display-6 fw-bold text-ink mb-1">8</div>
-            <span class="text-secondary small">3 consultations · 5 follow-ups</span>
+<div class="mc-page-container pb-5">
+    <!-- Page Header (UI Match: Doctor dashboard.png) -->
+    <div class="mc-page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="mc-page-label">@dayLabel AT AL NOUR CLINIC</span>
+                <h1 class="mc-page-title mb-1">Good morning, Dr. @doctorName.</h1>
+                <p class="mc-page-subtitle mb-0">Your clinical schedule and patient consultation overview</p>
+            </div>
+            <div>
+                <a asp-controller="Doctor" asp-action="Schedule" class="mc-btn mc-btn-primary">
+                    <i class="bi bi-calendar3 me-1"></i> View my schedule
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="mc-card p-4 h-100">
-            <span class="d-block text-secondary small mb-1">Completed visits</span>
-            <div class="display-6 fw-bold text-ink mb-1">3 / 8</div>
-            <span class="text-secondary small">5 patients still to see</span>
-        </div>
-    </div>
-
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="mc-card p-4 h-100">
-            <span class="d-block text-secondary small mb-1">Next consultation</span>
-            <div class="display-6 fw-bold text-ink mb-1">10:30 AM</div>
-            <span class="text-secondary small">Ahmed Tarek · Follow-up</span>
-        </div>
-    </div>
-
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="mc-card p-4 h-100">
-            <span class="d-block text-secondary small mb-1">Specialization</span>
-            <div class="display-6 fw-bold text-ink mb-1" style="font-size: 22px; line-height: 1.4;">@specialty</div>
-            <span class="text-secondary small">Clinic @room</span>
-        </div>
-    </div>
-</div>
-
-<!-- Main Section: Today's Schedule Placeholder -->
-<div class="row g-4">
-    <div class="col-12 col-lg-8">
-        <div class="mc-card p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h2 class="h6 mb-0 fw-bold text-ink">Today's schedule</h2>
-                    <span class="text-secondary small">@specialty · @room · 09:00 AM–03:00 PM</span>
-                </div>
-                <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-confirmed-text);">
-                    Task 2A Placeholder
+    <!-- ═══ KPI Summary Cards (UI Match: Doctor dashboard.png) ═══ -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="mc-card p-4 h-100">
+                <span class="d-block text-secondary small mb-1">Today's patients</span>
+                <div class="display-6 fw-bold text-ink mb-1">@Model.TodayPatientsCount</div>
+                <span class="text-secondary small">
+                    @Model.TodayAppointments.Count(a => a.Status == MediCare.Data.Entities.AppointmentStatus.Confirmed) confirmed · @Model.TodayAppointments.Count(a => a.Status == MediCare.Data.Entities.AppointmentStatus.Pending) pending
                 </span>
             </div>
+        </div>
 
-            <div class="table-responsive">
-                <table class="table mc-table align-middle">
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Patient / Visit</th>
-                            <th>Status</th>
-                            <th>Record</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="fw-semibold">09:00 AM</td>
-                            <td>
-                                <strong class="d-block text-ink">Dina Ashraf</strong>
-                                <span class="text-secondary small">P-1130 · Consultation</span>
-                            </td>
-                            <td>
-                                <span class="badge" style="background-color: var(--mc-completed-bg); color: var(--mc-completed-text);">
-                                    Completed
-                                </span>
-                            </td>
-                            <td>
-                                <span class="text-secondary small">View notes</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="fw-semibold">10:30 AM</td>
-                            <td>
-                                <strong class="d-block text-ink">Ahmed Tarek</strong>
-                                <span class="text-secondary small">P-1042 · Follow-up</span>
-                            </td>
-                            <td>
-                                <span class="badge" style="background-color: var(--mc-confirmed-bg); color: var(--mc-confirmed-text);">
-                                    Confirmed
-                                </span>
-                            </td>
-                            <td>
-                                <span class="text-primary small fw-semibold">Open record</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="fw-semibold">12:00 PM</td>
-                            <td>
-                                <strong class="d-block text-ink">Mostafa Nabil</strong>
-                                <span class="text-secondary small">P-1152 · Follow-up</span>
-                            </td>
-                            <td>
-                                <span class="badge" style="background-color: var(--mc-pending-bg); color: var(--mc-pending-text);">
-                                    Pending
-                                </span>
-                            </td>
-                            <td>
-                                <span class="text-secondary small">Review</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="mc-card p-4 h-100">
+                <span class="d-block text-secondary small mb-1">Completed visits</span>
+                <div class="display-6 fw-bold text-ink mb-1">@Model.CompletedVisitsCount / @Model.TodayPatientsCount</div>
+                <span class="text-secondary small">
+                    @(Math.Max(0, Model.TodayPatientsCount - Model.CompletedVisitsCount)) patients still to see
+                </span>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="mc-card p-4 h-100">
+                <span class="d-block text-secondary small mb-1">Next consultation</span>
+                <div class="display-6 fw-bold text-ink mb-1">
+                    @(Model.NextConsultation != null ? Model.NextConsultation.StartTime.ToString(@"hh\:mm") : "None")
+                </div>
+                <span class="text-secondary small text-truncate d-block">
+                    @(Model.NextConsultation != null ? $"{Model.NextConsultation.PatientName} · {Model.NextConsultation.PatientCode}" : "No pending consultations")
+                </span>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="mc-card p-4 h-100">
+                <span class="d-block text-secondary small mb-1">Pending requests</span>
+                <div class="display-6 fw-bold text-ink mb-1">@Model.PendingRequestsCount</div>
+                <span class="text-secondary small">
+                    @(Model.PendingRequestsCount > 0 ? "Requires confirmation" : "All requests handled")
+                </span>
             </div>
         </div>
     </div>
 
-    <div class="col-12 col-lg-4">
-        <!-- Up Next Panel (UI Match: Doctor dashboard.png) -->
-        <div class="mc-card p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="small text-uppercase fw-bold text-secondary">Up next</span>
-                <span class="text-secondary small">10:30–11:00 AM</span>
-            </div>
-
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div style="width: 44px; height: 44px; background-color: var(--mc-primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--mc-ink);">
-                    AT
+    <!-- ═══ Main Section: Today's Schedule & Side Panel ═══ -->
+    <div class="row g-4">
+        <!-- ── Left Column: Today's Schedule & Confirmation Queue ── -->
+        <div class="col-12 col-xl-8">
+            <!-- Today's Schedule Table Card -->
+            <div class="mc-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h6 mb-0 fw-bold text-ink">Today's schedule</h2>
+                        <span class="text-secondary small">@specialty · @room · @DateTime.Today.ToString("dd MMM yyyy")</span>
+                    </div>
+                    <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-ink);">
+                        @Model.TodayAppointments.Count appointments
+                    </span>
                 </div>
-                <div>
-                    <h3 class="h6 mb-0 fw-bold text-ink">Ahmed Tarek</h3>
-                    <span class="text-secondary small">P-1042 · 38 years · Male</span>
+
+                @if (!Model.TodayAppointments.Any())
+                {
+                    <div class="text-center py-5 text-secondary">
+                        <i class="bi bi-calendar-check fs-1 d-block mb-2 text-muted"></i>
+                        <p class="mb-0 fw-semibold">No appointments scheduled for today.</p>
+                        <span class="small">New appointments booked by patients will appear here.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table mc-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Patient / Visit</th>
+                                    <th>Status</th>
+                                    <th>Actions / Record</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.TodayAppointments)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@item.FormattedTime</td>
+                                        <td>
+                                            <strong class="d-block text-ink">@item.PatientName</strong>
+                                            <span class="text-secondary small">@item.PatientCode · @(!string.IsNullOrEmpty(item.Notes) ? item.Notes : "Consultation")</span>
+                                        </td>
+                                        <td>
+                                            @switch (item.Status)
+                                            {
+                                                case MediCare.Data.Entities.AppointmentStatus.Confirmed:
+                                                    <span class="mc-badge mc-badge--confirmed">Confirmed</span>
+                                                    break;
+                                                case MediCare.Data.Entities.AppointmentStatus.Pending:
+                                                    <span class="mc-badge mc-badge--pending">Pending</span>
+                                                    break;
+                                                case MediCare.Data.Entities.AppointmentStatus.Completed:
+                                                    <span class="mc-badge mc-badge--completed">Completed</span>
+                                                    break;
+                                                case MediCare.Data.Entities.AppointmentStatus.Cancelled:
+                                                    <span class="mc-badge mc-badge--cancelled">Cancelled</span>
+                                                    break;
+                                                case MediCare.Data.Entities.AppointmentStatus.Rejected:
+                                                    <span class="mc-badge mc-badge--rejected">Declined</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.Status == MediCare.Data.Entities.AppointmentStatus.Pending)
+                                            {
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <form asp-action="Confirm" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="appointmentId" value="@item.Id" />
+                                                        <input type="hidden" name="rowVersionBase64" value="@Convert.ToBase64String(item.RowVersion)" />
+                                                        <button type="submit" class="mc-btn mc-btn-primary mc-btn-sm" title="Confirm appointment">
+                                                            <i class="bi bi-check2"></i> Confirm
+                                                        </button>
+                                                    </form>
+                                                    <button type="button"
+                                                            class="mc-btn mc-btn-outline-danger mc-btn-sm"
+                                                            title="Decline appointment"
+                                                            onclick="openRejectModal(@item.Id, '@Convert.ToBase64String(item.RowVersion)', '@item.PatientName', '@item.FormattedTime', '@item.AppointmentDate.ToString("yyyy-MM-dd")')">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>
+                                                </div>
+                                            }
+                                            else if (item.Status == MediCare.Data.Entities.AppointmentStatus.Confirmed)
+                                            {
+                                                <button type="button" class="mc-btn mc-btn-secondary mc-btn-sm" disabled title="Medical records will be added in Task 6">
+                                                    <i class="bi bi-file-medical me-1"></i> Open record
+                                                </button>
+                                            }
+                                            else if (item.Status == MediCare.Data.Entities.AppointmentStatus.Completed)
+                                            {
+                                                <span class="text-secondary small">
+                                                    <i class="bi bi-check2-circle text-success me-1"></i> View notes
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-secondary small">—</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+            <!-- Confirmation Queue Section -->
+            <div class="mc-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h6 mb-0 fw-bold text-ink">Confirmation queue</h2>
+                        <span class="text-secondary small">Pending appointment booking requests requiring your response</span>
+                    </div>
+                    <span class="mc-badge mc-badge--pending">
+                        @Model.PendingAppointments.Count pending
+                    </span>
+                </div>
+
+                @if (!Model.PendingAppointments.Any())
+                {
+                    <div class="text-center py-4 text-secondary">
+                        <i class="bi bi-check2-circle fs-2 text-success d-block mb-1"></i>
+                        <span class="fw-semibold text-ink">All caught up!</span>
+                        <p class="small text-secondary mb-0">No appointment requests are waiting for confirmation.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table mc-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Patient</th>
+                                    <th>Notes</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var req in Model.PendingAppointments)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong class="d-block text-ink">@req.AppointmentDate.ToString("ddd, dd MMM yyyy")</strong>
+                                            <span class="text-secondary small">@req.FormattedTime</span>
+                                        </td>
+                                        <td>
+                                            <strong class="d-block text-ink">@req.PatientName</strong>
+                                            <span class="text-secondary small">@req.PatientCode @(!string.IsNullOrEmpty(req.PatientPhone) ? $"· {req.PatientPhone}" : "")</span>
+                                        </td>
+                                        <td>
+                                            <span class="small text-secondary">
+                                                @(!string.IsNullOrEmpty(req.Notes) ? req.Notes : "General Consultation")
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-inline-flex align-items-center gap-1">
+                                                <form asp-action="Confirm" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="appointmentId" value="@req.Id" />
+                                                    <input type="hidden" name="rowVersionBase64" value="@Convert.ToBase64String(req.RowVersion)" />
+                                                    <button type="submit" class="mc-btn mc-btn-primary mc-btn-sm">
+                                                        <i class="bi bi-check2 me-1"></i> Confirm
+                                                    </button>
+                                                </form>
+                                                <button type="button"
+                                                        class="mc-btn mc-btn-outline-danger mc-btn-sm"
+                                                        onclick="openRejectModal(@req.Id, '@Convert.ToBase64String(req.RowVersion)', '@req.PatientName', '@req.FormattedTime', '@req.AppointmentDate.ToString("yyyy-MM-dd")')">
+                                                    <i class="bi bi-x me-1"></i> Decline
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ── Right Column: Up Next & Doctor Profile Quick Info ── -->
+        <div class="col-12 col-xl-4">
+            <!-- Up Next Card (UI Match: Doctor dashboard.png) -->
+            <div class="mc-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="small text-uppercase fw-bold text-secondary">Up next</span>
+                    <span class="text-secondary small">@(Model.NextConsultation?.FormattedTime ?? "—")</span>
+                </div>
+
+                @if (Model.NextConsultation != null)
+                {
+                    var next = Model.NextConsultation;
+                    var initials = !string.IsNullOrEmpty(next.PatientName)
+                        ? string.Join("", next.PatientName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => s[0])).ToUpperInvariant()
+                        : "PT";
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div style="width: 44px; height: 44px; background-color: var(--mc-primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--mc-ink);">
+                            @initials
+                        </div>
+                        <div>
+                            <h3 class="h6 mb-0 fw-bold text-ink">@next.PatientName</h3>
+                            <span class="text-secondary small">@next.PatientCode · @(!string.IsNullOrEmpty(next.PatientPhone) ? next.PatientPhone : "Patient")</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="mc-badge mc-badge--confirmed me-1">Confirmed</span>
+                    </div>
+
+                    <div class="p-3 rounded mb-3" style="background-color: var(--mc-canvas); border: 1px solid var(--mc-hairline);">
+                        <span class="d-block text-secondary small">Reason for visit:</span>
+                        <strong class="text-ink small">@(!string.IsNullOrEmpty(next.Notes) ? next.Notes : "General Consultation")</strong>
+                    </div>
+
+                    <button type="button" class="mc-btn mc-btn-primary w-100" disabled title="Consultations & Medical Records will be built in Task 6">
+                        <i class="bi bi-play-circle me-1"></i> Start consultation
+                    </button>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-secondary">
+                        <div class="mx-auto mb-2" style="width: 44px; height: 44px; background-color: var(--mc-canvas); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--mc-secondary-text);">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <p class="mb-0 fw-semibold text-ink">No upcoming consultations</p>
+                        <span class="small text-secondary">Check back when new appointments are confirmed.</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Quick Links / Doctor Details Card -->
+            <div class="mc-card p-4">
+                <h3 class="h6 fw-bold text-ink mb-3">Clinic Practice Info</h3>
+                <div class="d-flex flex-column gap-2 small">
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-secondary">Specialization</span>
+                        <strong class="text-ink">@specialty</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-secondary">Assigned Room</span>
+                        <strong class="text-ink">@room</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-secondary">Clinic Location</span>
+                        <span class="text-ink">Al Nour Clinic, Cairo</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2">
+                    <a asp-controller="Doctor" asp-action="Schedule" class="mc-btn mc-btn-secondary w-100 mb-2">
+                        <i class="bi bi-calendar-range me-1"></i> Manage Weekly Schedule
+                    </a>
+                    <a asp-controller="Doctor" asp-action="Profile" class="mc-btn mc-btn-secondary w-100">
+                        <i class="bi bi-person me-1"></i> Edit Doctor Profile
+                    </a>
                 </div>
             </div>
-
-            <div class="mb-3">
-                <span class="badge me-1" style="background-color: var(--mc-confirmed-bg); color: var(--mc-confirmed-text);">Confirmed</span>
-                <span class="badge" style="background-color: #E8F5E9; color: #388E3C;">Checked in</span>
-            </div>
-
-            <div class="p-3 rounded mb-3" style="background-color: var(--mc-canvas); border: 1px solid var(--mc-hairline);">
-                <span class="d-block text-secondary small">Reason for visit:</span>
-                <strong class="text-ink small">Hypertension follow-up</strong>
-            </div>
-
-            <div class="p-2 rounded mb-3" style="background-color: #FFF3E0; border: 1px solid #FFE0B2; font-size: 12px; color: #E65100;">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i> Allergy: Penicillin
-            </div>
-
-            <button type="button" class="mc-btn mc-btn-primary w-100" disabled>
-                <i class="bi bi-play-circle me-1"></i> Start consultation (Task 3)
-            </button>
         </div>
     </div>
 </div>
+
+<!-- ═══ Decline Appointment Modal ═══ -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-action="Reject" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="appointmentId" id="rejectAppointmentId" />
+                <input type="hidden" name="rowVersionBase64" id="rejectRowVersion" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title h6 fw-bold text-ink" id="rejectModalLabel">
+                        <i class="bi bi-x-circle text-danger me-1"></i> Decline Appointment Request
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-secondary small mb-3">
+                        Are you sure you want to decline the appointment for <strong class="text-ink" id="rejectPatientName"></strong> on <span id="rejectDate" class="text-ink fw-semibold"></span> at <span id="rejectTime" class="text-ink fw-semibold"></span>?
+                    </p>
+                    <div class="mb-3">
+                        <label for="rejectReason" class="mc-form-label">Reason for declining (optional, sent to patient):</label>
+                        <textarea class="form-control mc-form-control"
+                                  id="rejectReason"
+                                  name="reason"
+                                  rows="3"
+                                  placeholder="e.g. Doctor unavailable due to clinical emergency, please book an alternative slot."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="mc-btn mc-btn-secondary" data-bs-dismiss="modal">Keep Appointment</button>
+                    <button type="submit" class="mc-btn mc-btn-outline-danger">
+                        <i class="bi bi-x-circle me-1"></i> Confirm Decline
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openRejectModal(id, rowVersion, patientName, time, date) {
+            document.getElementById('rejectAppointmentId').value = id;
+            document.getElementById('rejectRowVersion').value = rowVersion;
+            document.getElementById('rejectPatientName').textContent = patientName;
+            document.getElementById('rejectDate').textContent = date;
+            document.getElementById('rejectTime').textContent = time;
+
+            var modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            modal.show();
+        }
+    </script>
+}

@@ -25,6 +25,7 @@ public class ScheduleController : Controller
     /// GET /Schedule/FreeSlots?doctorId=&start=&end=
     /// </summary>
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> FreeSlots(int doctorId, string? start, string? end)
     {
         if (doctorId <= 0)

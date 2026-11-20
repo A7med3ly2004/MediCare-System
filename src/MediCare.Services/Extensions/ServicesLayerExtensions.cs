@@ -1,4 +1,5 @@
 using MediCare.Services.Account;
+using MediCare.Services.Appointments;
 using MediCare.Services.Doctors;
 using MediCare.Services.Email;
 using MediCare.Services.Interfaces;
@@ -19,6 +20,8 @@ public static class ServicesLayerExtensions
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IDoctorService, DoctorService>();
         services.AddScoped<IScheduleService, ScheduleService>();
+        services.AddScoped<IAppointmentService, AppointmentService>();
+        services.AddHostedService<AppointmentReminderHostedService>();
 
         var sendGridKey = configuration["SendGrid:ApiKey"];
         if (!string.IsNullOrWhiteSpace(sendGridKey))
