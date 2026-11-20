@@ -4,4 +4,7 @@
     <Project Path="src/MediCare.Services/MediCare.Services.csproj" />
     <Project Path="src/MediCare.Web/MediCare.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MediCare.UnitTests/MediCare.UnitTests.csproj" />
+  </Folder>
 </Solution>

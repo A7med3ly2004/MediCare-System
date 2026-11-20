@@ -4,6 +4,7 @@ using MediCare.Services.Email;
 using MediCare.Services.Interfaces;
 using MediCare.Services.Notifications;
 using MediCare.Services.Otp;
+using MediCare.Services.Schedule;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,6 +18,7 @@ public static class ServicesLayerExtensions
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IDoctorService, DoctorService>();
+        services.AddScoped<IScheduleService, ScheduleService>();
 
         var sendGridKey = configuration["SendGrid:ApiKey"];
         if (!string.IsNullOrWhiteSpace(sendGridKey))

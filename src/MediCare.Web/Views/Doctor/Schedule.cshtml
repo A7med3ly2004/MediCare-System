@@ -1,0 +1,358 @@
+@model MediCare.Web.ViewModels.Schedule.DoctorSchedulePageViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "My Schedule & Availability";
+    ViewData["ActiveNav"] = "schedule";
+}
+
+<div class="mc-page-container pb-5">
+    <!-- Header Row -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
+        <div>
+            <h1 class="mc-page-title mb-1">My Schedule & Availability</h1>
+            <p class="mc-page-subtitle mb-0">Configure your weekly consulting hours, appointment slot lengths, and planned vacation days.</p>
+        </div>
+        <div>
+            <span class="mc-text-secondary mc-fs-13 fw-medium">
+                @DateTime.UtcNow.AddHours(2).ToString("dddd, dd MMMM yyyy") (Cairo GMT+2)
+            </span>
+        </div>
+    </div>
+
+    <!-- ═══ BR-06 CONFLICT ALERT BANNER ════════════════════════════════════════ -->
+    @if (Model.Conflicts.Any())
+    {
+        <div class="mc-card p-4 mb-4 border-danger shadow-sm" style="border-left: 5px solid var(--mc-cancelled-text) !important;">
+            <div class="d-flex align-items-center gap-2 text-danger mb-2">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <h2 class="h6 fw-bold mb-0 text-danger">Schedule Conflict Detected (Business Rule BR-06)</h2>
+            </div>
+            <p class="mc-text-secondary mc-fs-13 mb-3">
+                @(Model.ErrorMessage ?? "Cannot change schedule or vacation dates because it conflicts with existing pending or confirmed appointments.")
+            </p>
+
+            <div class="table-responsive">
+                <table class="table mc-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Patient</th>
+                            <th>Status</th>
+                            <th>Conflict Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Conflicts)
+                        {
+                            <tr>
+                                <td><strong class="text-ink">@c.AppointmentDate.ToString("ddd, dd MMM yyyy")</strong></td>
+                                <td><span class="text-secondary">@c.StartTime.ToString(@"hh\:mm") – @c.EndTime.ToString(@"hh\:mm")</span></td>
+                                <td>
+                                    <strong class="text-ink">@c.PatientName</strong>
+                                    <span class="mc-text-secondary mc-fs-12 d-block">(@c.PatientCode)</span>
+                                </td>
+                                <td>
+                                    @if (c.Status == MediCare.Data.Entities.AppointmentStatus.Confirmed)
+                                    {
+                                        <span class="mc-badge mc-badge--confirmed">Confirmed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="mc-badge mc-badge--pending">Pending</span>
+                                    }
+                                </td>
+                                <td><span class="text-danger mc-fs-13">@c.ConflictReason</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3 pt-3 border-top" style="border-color: var(--mc-hairline) !important;">
+                <span class="mc-text-secondary mc-fs-12">
+                    <i class="bi bi-info-circle me-1"></i>
+                    To make this schedule change, please review and resolve or reschedule the appointments listed above first.
+                </span>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger py-2 mb-4" role="alert">
+            <i class="bi bi-exclamation-circle me-1"></i> @Model.ErrorMessage
+        </div>
+    }
+
+    <!-- ═══ 2-COLUMN MAIN CONTENT ═══════════════════════════════════════════════ -->
+    <div class="row g-4">
+        <!-- ── Left Column: Weekly Hours Editor ───────────────────────────────── -->
+        <div class="col-12 col-xl-8">
+            <div class="mc-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h6 fw-bold text-ink mb-1">Weekly Consulting Hours</h2>
+                        <p class="mc-text-secondary mc-fs-13 mb-0">Define which days you work, your shift times, and appointment slot durations.</p>
+                    </div>
+                </div>
+
+                <form asp-action="UpdateWorkingHours" method="post" id="workingHoursForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="DoctorId" />
+                    <input type="hidden" asp-for="DoctorName" />
+
+                    <div class="d-flex flex-column gap-3 mb-4">
+                        @for (int i = 0; i < Model.Days.Count; i++)
+                        {
+                            var day = Model.Days[i];
+                            <div class="p-3 rounded border" style="background-color: var(--mc-surface); border-color: var(--mc-hairline) !important;" id="dayCard-@i">
+                                <input type="hidden" name="Days[@i].DayOfWeek" value="@day.DayOfWeek" />
+                                <input type="hidden" name="Days[@i].DayName" value="@day.DayName" />
+
+                                <!-- Day Header with Toggle -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input day-toggle"
+                                               type="checkbox"
+                                               role="switch"
+                                               id="enableDay-@i"
+                                               name="Days[@i].IsEnabled"
+                                               value="true"
+                                               @(day.IsEnabled ? "checked" : "")
+                                               onchange="toggleDayWindows(@i)" />
+                                        <label class="form-check-label fw-bold text-ink ms-1" for="enableDay-@i">
+                                            @day.DayName
+                                        </label>
+                                    </div>
+                                    <span class="mc-text-secondary mc-fs-12" id="dayStatus-@i">
+                                        @(day.IsEnabled ? "Working" : "Off duty")
+                                    </span>
+                                </div>
+
+                                <!-- Windows Container -->
+                                <div id="windowsContainer-@i" style="display: @(day.IsEnabled ? "block" : "none");">
+                                    <div id="windowsList-@i" class="d-flex flex-column gap-2 mt-2">
+                                        @for (int j = 0; j < day.Windows.Count; j++)
+                                        {
+                                            var win = day.Windows[j];
+                                            <div class="row g-2 align-items-center window-row" id="windowRow-@i-@j">
+                                                <input type="hidden" name="Days[@i].Windows[@j].Id" value="@win.Id" />
+                                                <div class="col-12 col-sm-4">
+                                                    <label class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold mb-1">Start Time</label>
+                                                    <input type="time"
+                                                           name="Days[@i].Windows[@j].StartTime"
+                                                           value="@win.StartTime"
+                                                           class="form-control form-control-sm"
+                                                           required />
+                                                </div>
+                                                <div class="col-12 col-sm-4">
+                                                    <label class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold mb-1">End Time</label>
+                                                    <input type="time"
+                                                           name="Days[@i].Windows[@j].EndTime"
+                                                           value="@win.EndTime"
+                                                           class="form-control form-control-sm"
+                                                           required />
+                                                </div>
+                                                <div class="col-10 col-sm-3">
+                                                    <label class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold mb-1">Slot Duration</label>
+                                                    <select name="Days[@i].Windows[@j].SlotMinutes" class="form-select form-select-sm">
+                                                        <!option value="15" @(win.SlotMinutes == 15 ? "selected" : "")>15 mins</!option>
+                                                        <!option value="20" @(win.SlotMinutes == 20 ? "selected" : "")>20 mins</!option>
+                                                        <!option value="30" @(win.SlotMinutes == 30 ? "selected" : "")>30 mins</!option>
+                                                        <!option value="45" @(win.SlotMinutes == 45 ? "selected" : "")>45 mins</!option>
+                                                        <!option value="60" @(win.SlotMinutes == 60 ? "selected" : "")>60 mins</!option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-2 col-sm-1 d-flex align-items-end justify-content-end">
+                                                    <button type="button"
+                                                            class="mc-btn mc-btn-ghost text-danger p-1"
+                                                            title="Remove window"
+                                                            onclick="removeWindowRow(@i, @j)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <button type="button"
+                                                class="btn btn-sm btn-link text-decoration-none p-0 mc-text-primary"
+                                                onclick="addWindowRow(@i)">
+                                            <i class="bi bi-plus-circle me-1"></i> Add another shift / window
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 pt-3 border-top" style="border-color: var(--mc-hairline) !important;">
+                        <button type="submit" class="mc-btn mc-btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i> Save Working Hours
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ── Right Column: Vacation Days Management ─────────────────────────── -->
+        <div class="col-12 col-xl-4">
+            <!-- Add Vacation Day Card -->
+            <div class="mc-card p-4 mb-4">
+                <h2 class="h6 fw-bold text-ink mb-1">Add Vacation Day</h2>
+                <p class="mc-text-secondary mc-fs-13 mb-3">Record planned leaves or clinic closures. Online bookings will be paused for that day.</p>
+
+                <form asp-action="AddVacation" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="DoctorId" value="@Model.DoctorId" />
+                    <input type="hidden" name="DoctorName" value="@Model.DoctorName" />
+
+                    <div class="mb-3">
+                        <label asp-for="NewVacation.VacationDate" class="form-label"></label>
+                        <input type="date"
+                               name="NewVacation.VacationDate"
+                               min="@DateTime.UtcNow.AddHours(2).ToString("yyyy-MM-dd")"
+                               class="form-control"
+                               required />
+                        <span asp-validation-for="NewVacation.VacationDate" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="NewVacation.Reason" class="form-label"></label>
+                        <input type="text"
+                               name="NewVacation.Reason"
+                               placeholder="e.g. Annual Leave, Medical Conference"
+                               class="form-control" />
+                        <span asp-validation-for="NewVacation.Reason" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <button type="submit" class="mc-btn mc-btn-primary w-100">
+                        <i class="bi bi-calendar-plus me-1"></i> Add Vacation Day
+                    </button>
+                </form>
+            </div>
+
+            <!-- Vacation Days List Card -->
+            <div class="mc-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h6 fw-bold text-ink mb-0">Upcoming Vacation Days</h2>
+                    <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-confirmed-text); font-size: 11px;">
+                        @Model.Vacations.Count days
+                    </span>
+                </div>
+
+                @if (Model.Vacations.Any())
+                {
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var vac in Model.Vacations)
+                        {
+                            <div class="p-3 rounded border d-flex justify-content-between align-items-center"
+                                 style="background-color: var(--mc-canvas); border-color: var(--mc-hairline) !important;">
+                                <div>
+                                    <strong class="mc-text-ink mc-fs-13 d-block">
+                                        <i class="bi bi-calendar-x text-danger me-1"></i>
+                                        @vac.VacationDate.ToString("ddd, dd MMMM yyyy")
+                                    </strong>
+                                    @if (!string.IsNullOrEmpty(vac.Reason))
+                                    {
+                                        <span class="mc-text-secondary mc-fs-12">@vac.Reason</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="mc-text-muted mc-fs-12 fst-italic">No reason specified</span>
+                                    }
+                                </div>
+                                <form asp-action="RemoveVacation" method="post" onsubmit="return confirm('Remove this vacation day?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="vacationId" value="@vac.Id" />
+                                    <button type="submit" class="mc-btn mc-btn-ghost text-danger p-1" title="Remove vacation day">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="mc-text-secondary mc-fs-13 mb-0">No upcoming vacation days registered.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function toggleDayWindows(dayIndex) {
+            var toggle = document.getElementById('enableDay-' + dayIndex);
+            var container = document.getElementById('windowsContainer-' + dayIndex);
+            var status = document.getElementById('dayStatus-' + dayIndex);
+
+            if (toggle.checked) {
+                container.style.display = 'block';
+                status.textContent = 'Working';
+                // If no window exists, add one
+                var list = document.getElementById('windowsList-' + dayIndex);
+                if (list.children.length === 0) {
+                    addWindowRow(dayIndex);
+                }
+            } else {
+                container.style.display = 'none';
+                status.textContent = 'Off duty';
+            }
+        }
+
+        function removeWindowRow(dayIndex, winIndex) {
+            var row = document.getElementById('windowRow-' + dayIndex + '-' + winIndex);
+            if (row) {
+                var list = document.getElementById('windowsList-' + dayIndex);
+                if (list.children.length <= 1) {
+                    // Turn off the day if last window removed
+                    var toggle = document.getElementById('enableDay-' + dayIndex);
+                    toggle.checked = false;
+                    toggleDayWindows(dayIndex);
+                } else {
+                    row.remove();
+                }
+            }
+        }
+
+        function addWindowRow(dayIndex) {
+            var list = document.getElementById('windowsList-' + dayIndex);
+            var nextIndex = list.children.length;
+
+            var newRow = document.createElement('div');
+            newRow.className = 'row g-2 align-items-center window-row';
+            newRow.id = 'windowRow-' + dayIndex + '-' + nextIndex;
+            newRow.innerHTML = `
+                <input type="hidden" name="Days[${dayIndex}].Windows[${nextIndex}].Id" value="0" />
+                <div class="col-12 col-sm-4">
+                    <label class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold mb-1">Start Time</label>
+                    <input type="time" name="Days[${dayIndex}].Windows[${nextIndex}].StartTime" value="09:00" class="form-control form-control-sm" required />
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold mb-1">End Time</label>
+                    <input type="time" name="Days[${dayIndex}].Windows[${nextIndex}].EndTime" value="17:00" class="form-control form-control-sm" required />
+                </div>
+                <div class="col-10 col-sm-3">
+                    <label class="mc-text-secondary mc-fs-11 text-uppercase fw-semibold mb-1">Slot Duration</label>
+                    <select name="Days[${dayIndex}].Windows[${nextIndex}].SlotMinutes" class="form-select form-select-sm">
+                        <option value="15">15 mins</option>
+                        <option value="20">20 mins</option>
+                        <option value="30" selected>30 mins</option>
+                        <option value="45">45 mins</option>
+                        <option value="60">60 mins</option>
+                    </select>
+                </div>
+                <div class="col-2 col-sm-1 d-flex align-items-end justify-content-end">
+                    <button type="button" class="mc-btn mc-btn-ghost text-danger p-1" title="Remove window" onclick="removeWindowRow(${dayIndex}, ${nextIndex})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            list.appendChild(newRow);
+        }
+    </script>
+}

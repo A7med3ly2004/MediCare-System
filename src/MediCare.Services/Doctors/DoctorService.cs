@@ -3,6 +3,7 @@ using MediCare.Data.Entities;
 using MediCare.Data.UnitOfWork;
 using MediCare.Services.Account;
 using MediCare.Services.Interfaces;
+using MediCare.Services.Schedule;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -66,14 +67,59 @@ public class DoctorService : IDoctorService
 
         var doctorsList = await query.ToListAsync(ct);
 
-        // Filter: Availability on chosen date (Step 3: evaluated via IsDoctorAvailableOnDate)
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var clinicNow = ScheduleService.GetClinicLocalNow();
+        var today = DateOnly.FromDateTime(clinicNow);
         var targetDate = filter.AvailableOn ?? today;
 
+        // Efficient single-query retrieval of active appointments for all candidate doctors on relevant dates
+        var candidateDoctorIds = doctorsList.Select(d => d.Id).ToList();
+        var relevantDates = new List<DateOnly> { today };
+        if (filter.AvailableOn.HasValue && filter.AvailableOn.Value != today)
+        {
+            relevantDates.Add(filter.AvailableOn.Value);
+        }
+
+        var activeAppointments = await _dbContext.Appointments
+            .AsNoTracking()
+            .Where(a => candidateDoctorIds.Contains(a.DoctorId)
+                     && relevantDates.Contains(a.AppointmentDate)
+                     && a.Status != AppointmentStatus.Cancelled
+                     && a.Status != AppointmentStatus.Rejected)
+            .ToListAsync(ct);
+
+        var apptsByDoctorAndDate = activeAppointments
+            .GroupBy(a => (a.DoctorId, a.AppointmentDate))
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Compute real free-slot availability for today and the filter date (Task 4)
+        var doctorAvailability = doctorsList.ToDictionary(
+            d => d.Id,
+            d =>
+            {
+                apptsByDoctorAndDate.TryGetValue((d.Id, today), out var todayAppts);
+                todayAppts ??= new List<Appointment>();
+                var isAvailToday = SlotCalculator.HasAnyFreeSlot(d.Schedules, d.VacationDays, todayAppts, today, clinicNow);
+
+                bool isAvailTarget;
+                if (!filter.AvailableOn.HasValue || filter.AvailableOn.Value == today)
+                {
+                    isAvailTarget = isAvailToday;
+                }
+                else
+                {
+                    apptsByDoctorAndDate.TryGetValue((d.Id, filter.AvailableOn.Value), out var targetAppts);
+                    targetAppts ??= new List<Appointment>();
+                    isAvailTarget = SlotCalculator.HasAnyFreeSlot(d.Schedules, d.VacationDays, targetAppts, filter.AvailableOn.Value, clinicNow);
+                }
+
+                return (AvailableToday: isAvailToday, AvailableTarget: isAvailTarget);
+            });
+
+        // Filter: Availability on chosen date (matches only if at least one free slot exists)
         if (filter.AvailableOn.HasValue)
         {
             doctorsList = doctorsList
-                .Where(d => IsDoctorAvailableOnDate(d, filter.AvailableOn.Value))
+                .Where(d => doctorAvailability[d.Id].AvailableTarget)
                 .ToList();
         }
 
@@ -87,10 +133,7 @@ public class DoctorService : IDoctorService
             .Take(pageSize)
             .Select(d =>
             {
-                var isAvailToday = IsDoctorAvailableOnDate(d, today);
-                var isAvailTarget = filter.AvailableOn.HasValue
-                    ? IsDoctorAvailableOnDate(d, filter.AvailableOn.Value)
-                    : isAvailToday;
+                var avail = doctorAvailability[d.Id];
 
                 // Build consulting hours summary string (e.g. "09:00–15:00" or first schedule)
                 var hoursSummary = "By appointment";
@@ -118,8 +161,8 @@ public class DoctorService : IDoctorService
                     Email = d.User.Email ?? string.Empty,
                     PhoneNumber = d.User.PhoneNumber,
                     ConsultingHoursSummary = hoursSummary,
-                    IsAvailableToday = isAvailToday,
-                    IsAvailableOnFilterDate = isAvailTarget
+                    IsAvailableToday = avail.AvailableToday,
+                    IsAvailableOnFilterDate = avail.AvailableTarget
                 };
             })
             .ToList();
@@ -135,7 +178,9 @@ public class DoctorService : IDoctorService
 
     public async Task<DoctorDirectoryStatsDto> GetDirectoryStatsAsync(CancellationToken ct = default)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var clinicNow = ScheduleService.GetClinicLocalNow();
+        var today = DateOnly.FromDateTime(clinicNow);
+
         var activeDoctors = await _dbContext.Doctors
             .Include(d => d.User)
             .Include(d => d.Schedules)
@@ -151,7 +196,27 @@ public class DoctorService : IDoctorService
             .ToListAsync(ct);
 
         var total = activeDoctors.Count;
-        var availableToday = activeDoctors.Count(d => IsDoctorAvailableOnDate(d, today));
+        var doctorIds = activeDoctors.Select(d => d.Id).ToList();
+
+        var todayAppointments = await _dbContext.Appointments
+            .AsNoTracking()
+            .Where(a => doctorIds.Contains(a.DoctorId)
+                     && a.AppointmentDate == today
+                     && a.Status != AppointmentStatus.Cancelled
+                     && a.Status != AppointmentStatus.Rejected)
+            .ToListAsync(ct);
+
+        var apptsByDoctor = todayAppointments
+            .GroupBy(a => a.DoctorId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var availableToday = activeDoctors.Count(d =>
+        {
+            apptsByDoctor.TryGetValue(d.Id, out var docAppts);
+            docAppts ??= new List<Appointment>();
+            return SlotCalculator.HasAnyFreeSlot(d.Schedules, d.VacationDays, docAppts, today, clinicNow);
+        });
+
         var specialties = await _dbContext.Specializations
             .Where(s => !s.IsDeleted)
             .CountAsync(ct);
@@ -302,11 +367,25 @@ public class DoctorService : IDoctorService
 
     public async Task<bool> CheckDoctorAvailabilityAsync(int doctorId, DateOnly date, CancellationToken ct = default)
     {
+        var clinicNow = ScheduleService.GetClinicLocalNow();
+        var today = DateOnly.FromDateTime(clinicNow);
+        if (date < today) return false;
+
         var doctor = await _dbContext.Doctors
             .Include(d => d.Schedules)
             .Include(d => d.VacationDays)
             .FirstOrDefaultAsync(d => d.Id == doctorId && !d.IsDeleted, ct);
 
-        return doctor != null && IsDoctorAvailableOnDate(doctor, date);
+        if (doctor == null) return false;
+
+        var dayAppts = await _dbContext.Appointments
+            .AsNoTracking()
+            .Where(a => a.DoctorId == doctorId
+                     && a.AppointmentDate == date
+                     && a.Status != AppointmentStatus.Cancelled
+                     && a.Status != AppointmentStatus.Rejected)
+            .ToListAsync(ct);
+
+        return SlotCalculator.HasAnyFreeSlot(doctor.Schedules, doctor.VacationDays, dayAppts, date, clinicNow);
     }
 }
