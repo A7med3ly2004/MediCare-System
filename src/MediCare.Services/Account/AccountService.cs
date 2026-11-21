@@ -2,6 +2,7 @@ using MediCare.Data.Entities;
 using MediCare.Data.UnitOfWork;
 using MediCare.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MediCare.Services.Account;
@@ -174,8 +175,9 @@ public class AccountService : IAccountService
 
     public async Task<LoginResult> LoginAsync(string email, string password)
     {
-        // Find user; UserManager respects global query filters by default for IdentityUser
-        var user = await _userManager.FindByEmailAsync(email);
+        // Find user ignoring query filter so soft-deleted accounts can be identified and rejected specifically
+        var normalizedEmail = email.ToUpperInvariant();
+        var user = await _userManager.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
 
         if (user is null)
             return LoginResult.Fail("Invalid email or password.");

@@ -96,7 +96,7 @@ public class AppointmentService : IAppointmentService
         }
 
         // Send notifications (errors logged internally, never rolls back appointment)
-        _ = _notificationService.SendBookingReceivedPatientAsync(
+        await _notificationService.SendBookingReceivedPatientAsync(
             patient.UserId,
             patient.User.Email ?? string.Empty,
             patient.User.FullName,
@@ -107,7 +107,7 @@ public class AppointmentService : IAppointmentService
             doctor.RoomNumber,
             doctor.ConsultationFee);
 
-        _ = _notificationService.SendBookingReceivedDoctorAsync(
+        await _notificationService.SendBookingReceivedDoctorAsync(
             doctor.UserId,
             doctor.User.Email ?? string.Empty,
             doctor.User.FullName,
@@ -186,7 +186,7 @@ public class AppointmentService : IAppointmentService
 
         if (appointment.Patient?.User != null)
         {
-            _ = _notificationService.SendAppointmentCancelledAsync(
+            await _notificationService.SendAppointmentCancelledAsync(
                 appointment.Patient.UserId,
                 appointment.Patient.User.Email ?? string.Empty,
                 appointment.Patient.User.FullName,
@@ -199,7 +199,7 @@ public class AppointmentService : IAppointmentService
 
         if (appointment.Doctor?.User != null)
         {
-            _ = _notificationService.SendAppointmentCancelledAsync(
+            await _notificationService.SendAppointmentCancelledAsync(
                 appointment.Doctor.UserId,
                 appointment.Doctor.User.Email ?? string.Empty,
                 $"Dr. {appointment.Doctor.User.FullName}",
@@ -284,7 +284,7 @@ public class AppointmentService : IAppointmentService
         // Notify patient and doctor
         if (appointment.Patient?.User != null)
         {
-            _ = _notificationService.SendAppointmentRescheduledAsync(
+            await _notificationService.SendAppointmentRescheduledAsync(
                 appointment.Patient.UserId,
                 appointment.Patient.User.Email ?? string.Empty,
                 appointment.Patient.User.FullName,
@@ -296,7 +296,7 @@ public class AppointmentService : IAppointmentService
 
         if (appointment.Doctor?.User != null)
         {
-            _ = _notificationService.SendAppointmentRescheduledAsync(
+            await _notificationService.SendAppointmentRescheduledAsync(
                 appointment.Doctor.UserId,
                 appointment.Doctor.User.Email ?? string.Empty,
                 $"Dr. {appointment.Doctor.User.FullName}",
@@ -378,7 +378,7 @@ public class AppointmentService : IAppointmentService
         // Notify patient
         if (appointment.Patient?.User != null)
         {
-            _ = _notificationService.SendAppointmentConfirmedAsync(
+            await _notificationService.SendAppointmentConfirmedAsync(
                 appointment.Patient.UserId,
                 appointment.Patient.User.Email ?? string.Empty,
                 appointment.Patient.User.FullName,
@@ -458,7 +458,7 @@ public class AppointmentService : IAppointmentService
         // Notify patient
         if (appointment.Patient?.User != null)
         {
-            _ = _notificationService.SendAppointmentRejectedAsync(
+            await _notificationService.SendAppointmentRejectedAsync(
                 appointment.Patient.UserId,
                 appointment.Patient.User.Email ?? string.Empty,
                 appointment.Patient.User.FullName,

@@ -5,6 +5,7 @@
     <Project Path="src/MediCare.Web/MediCare.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/MediCare.Tests/MediCare.Tests.csproj" />
     <Project Path="tests/MediCare.UnitTests/MediCare.UnitTests.csproj" />
   </Folder>
 </Solution>
