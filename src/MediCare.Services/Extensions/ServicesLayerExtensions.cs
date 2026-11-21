@@ -26,6 +26,7 @@ public static class ServicesLayerExtensions
         services.AddScoped<IAppointmentService, AppointmentService>();
         services.AddScoped<IMedicalRecordService, MedicalRecordService>();
         services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IReportExportService, ReportExportService>();
         services.AddScoped<IAdminManagementService, AdminManagementService>();
         services.AddHostedService<AppointmentReminderHostedService>();
 

@@ -324,4 +324,54 @@ public class AdminServiceTests
         var u2 = await db.Users.FindAsync(user.Id);
         Assert.False(u2!.IsSuspended);
     }
+
+    [Fact]
+    public async Task ExportDailyReportToExcel_GeneratesValidExcelBytes()
+    {
+        var exportService = new ReportExportService(NullLogger<ReportExportService>.Instance);
+        var report = new DailyReportDto
+        {
+            Date = new DateOnly(2026, 11, 21),
+            NewPatientRegistrations = 5,
+            NewDoctorRegistrations = 2,
+            AppointmentsBooked = 14,
+            AppointmentsConfirmed = 12,
+            AppointmentsCancelled = 2,
+            CompletedConsultations = 10,
+            EstimatedRevenue = 3500m
+        };
+
+        var bytes = await exportService.ExportDailyReportToExcelAsync(report);
+
+        Assert.NotNull(bytes);
+        Assert.True(bytes.Length > 100);
+        // Verify ZIP / XLSX magic bytes (PK..)
+        Assert.Equal(0x50, bytes[0]);
+        Assert.Equal(0x4B, bytes[1]);
+    }
+
+    [Fact]
+    public async Task ExportDailyReportToPdf_GeneratesValidPdfBytes()
+    {
+        var exportService = new ReportExportService(NullLogger<ReportExportService>.Instance);
+        var report = new DailyReportDto
+        {
+            Date = new DateOnly(2026, 11, 21),
+            NewPatientRegistrations = 5,
+            NewDoctorRegistrations = 2,
+            AppointmentsBooked = 14,
+            AppointmentsConfirmed = 12,
+            AppointmentsCancelled = 2,
+            CompletedConsultations = 10,
+            EstimatedRevenue = 3500m
+        };
+
+        var bytes = await exportService.ExportDailyReportToPdfAsync(report);
+
+        Assert.NotNull(bytes);
+        Assert.True(bytes.Length > 100);
+        // Verify PDF magic bytes (%PDF)
+        var header = System.Text.Encoding.ASCII.GetString(bytes.Take(4).ToArray());
+        Assert.Equal("%PDF", header);
+    }
 }
