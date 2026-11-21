@@ -20,6 +20,7 @@ public class DoctorController : Controller
     private readonly IScheduleService _scheduleService;
     private readonly IAppointmentService _appointmentService;
     private readonly IMedicalRecordService _medicalRecordService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<DoctorController> _logger;
 
     public DoctorController(
@@ -27,12 +28,14 @@ public class DoctorController : Controller
         IScheduleService scheduleService,
         IAppointmentService appointmentService,
         IMedicalRecordService medicalRecordService,
+        INotificationService notificationService,
         ILogger<DoctorController> logger)
     {
         _context = context;
         _scheduleService = scheduleService;
         _appointmentService = appointmentService;
         _medicalRecordService = medicalRecordService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -579,6 +582,21 @@ public class DoctorController : Controller
 
     [HttpGet]
     public IActionResult Settings() => RedirectToAction("Edit", "Doctors");
+
+    [HttpGet]
+    public async Task<IActionResult> Notifications(CancellationToken ct)
+    {
+        ViewData["Title"] = "Doctor Notifications";
+        ViewData["PortalLabel"] = "Doctor portal";
+        ViewData["PageLabel"] = "Notifications";
+        ViewData["ActiveNav"] = "overview";
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId)) return Challenge();
+
+        var notifications = await _notificationService.GetNotificationsByUserAsync(currentUserId, ct);
+        return View(notifications);
+    }
 
     // ── Helper Methods ────────────────────────────────────────────────────────
 

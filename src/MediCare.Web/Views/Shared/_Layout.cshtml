@@ -1,3 +1,4 @@
+@inject MediCare.Web.Services.ICurrentUserProfileService CurrentUserProfileService
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,31 +163,34 @@
                     <span class="mc-breadcrumb-page">@(ViewData["PageLabel"] ?? ViewData["Title"] ?? "Overview")</span>
                 </div>
 
-                <!-- Search bar -->
-                <div class="mc-topbar-search d-none d-lg-flex">
-                    <i class="bi bi-search mc-search-icon"></i>
-                    <input type="search" class="mc-search-input" placeholder="Search patients, doctors…" aria-label="Search" />
-                </div>
-
                 <!-- Right: theme toggle + bell + user chip -->
                 <div class="mc-topbar-right">
                     <button type="button" class="mc-theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light mode" title="Toggle theme">
                         <i class="bi bi-moon"></i>
                     </button>
-                    <button class="mc-topbar-icon-btn" aria-label="Notifications">
+                    @{
+                        var notifUrl = User.IsInRole("Admin") ? Url.Action("Notifications", "Admin")
+                                     : User.IsInRole("Doctor") ? Url.Action("Notifications", "Doctor")
+                                     : Url.Action("Notifications", "Patient");
+                        var currentUser = await CurrentUserProfileService.GetCurrentUserAsync();
+                    }
+                    <a href="@notifUrl" class="mc-topbar-icon-btn text-decoration-none" aria-label="Notifications" title="Notifications">
                         <i class="bi bi-bell"></i>
-                    </button>
+                    </a>
                     <div class="mc-user-chip">
                         <div class="mc-user-avatar">
-                            @(User.Identity?.Name?.Length > 0 ? User.Identity.Name.Substring(0, 1).ToUpper() : "?")
+                            @if (!string.IsNullOrEmpty(currentUser.ProfileImageUrl))
+                            {
+                                <img src="@currentUser.ProfileImageUrl" alt="@currentUser.DisplayName" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <span>@currentUser.Initial</span>
+                            }
                         </div>
                         <div class="mc-user-info d-none d-lg-block">
-                            <span class="mc-user-name">@User.Identity?.Name</span>
-                            <span class="mc-user-role">
-                                @if (User.IsInRole("Admin")) { <text>Clinic administrator</text> }
-                                else if (User.IsInRole("Doctor")) { <text>Doctor</text> }
-                                else { <text>Patient</text> }
-                            </span>
+                            <span class="mc-user-name">@currentUser.DisplayName</span>
+                            <span class="mc-user-role">@currentUser.RoleLabel</span>
                         </div>
                         <i class="bi bi-chevron-down mc-user-caret d-none d-lg-block"></i>
                     </div>

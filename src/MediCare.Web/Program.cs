@@ -17,6 +17,9 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<MediCare.Web.Services.ICurrentUserProfileService, MediCare.Web.Services.CurrentUserProfileService>();
+
 // Register the Data layer (DbContext, Repositories, Unit of Work, Seeder)
 builder.Services.AddDataLayer(builder.Configuration);
 

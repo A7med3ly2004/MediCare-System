@@ -53,6 +53,15 @@ In strict compliance with the **UI RULE** and **SPEC.md Out-of-Scope** constrain
 5. **Real-Time Messaging & Chat:**  
    - *Audit Check:* The static mockup `UI/Doctor dashboard.png` displayed a `Messages` item in the Doctor sidebar.  
    - *Resolution:* Real-time chat, instant messaging, and SignalR are explicitly out of scope per `docs/SPEC.md` and `AGENTS.md`. The `Messages` link and controller endpoint were completely removed so that only active, in-scope features (`Overview`, `My schedule`, `My patients`, `Medical records`, `Settings`) are presented.
+6. **Topbar Header Search Bar:**  
+   - *Audit Check:* The static mockups included a generic search input (`Search patients, doctors...`) in the topbar.  
+   - *Resolution:* Removed from the topbar in favor of dedicated, high-performance search and filter bars on each directory page (`/Doctors`, `/Admin/Doctors`, `/Admin/Patients`, `/Admin/Appointments`, `/Admin/Notifications`), eliminating dead controls.
+7. **Topbar User Profile & Photo:**  
+   - *Audit Check:* The topbar previously displayed the user's raw login email.  
+   - *Resolution:* Implemented `ICurrentUserProfileService` which dynamically resolves the user's Full Name (with normalized `"Dr."` prefix for doctors) and renders the doctor's uploaded circular avatar photo (`object-fit: cover`) with a fallback initial letter for Patient/Admin.
+8. **Functional Topbar Notification Bell:**  
+   - *Audit Check:* The bell icon was a static button.  
+   - *Resolution:* Wired to role-based notification views (`/Admin/Notifications`, `/Doctor/Notifications`, `/Patient/Notifications`), allowing all roles to review their transactional email alerts.
 
 ---
 

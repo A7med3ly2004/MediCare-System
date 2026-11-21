@@ -573,6 +573,16 @@ input, button, select, textarea {
   justify-content: center;
   flex-shrink: 0;
   object-fit: cover;
+  overflow: hidden;
+}
+
+.mc-user-avatar img,
+.mc-topbar__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 
 .mc-user-info,
