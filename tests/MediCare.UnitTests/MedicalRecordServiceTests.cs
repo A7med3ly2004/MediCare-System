@@ -1,5 +1,6 @@
 using MediCare.Data;
 using MediCare.Data.Entities;
+using MediCare.Data.Repositories.Interfaces;
 using MediCare.Data.UnitOfWork;
 using MediCare.Services.MedicalRecords;
 using Microsoft.EntityFrameworkCore;
@@ -329,5 +330,65 @@ public class MedicalRecordServiceTests
         };
 
         await Assert.ThrowsAsync<ArgumentException>(() => service.UpdatePatientProfileAsync(updateDto));
+    }
+
+    private class FailingUnitOfWork : IUnitOfWork
+    {
+        private readonly IUnitOfWork _inner;
+        public FailingUnitOfWork(IUnitOfWork inner) => _inner = inner;
+
+        public IDoctorRepository Doctors => _inner.Doctors;
+        public IPatientRepository Patients => _inner.Patients;
+        public IScheduleRepository Schedules => _inner.Schedules;
+        public IAppointmentRepository Appointments => _inner.Appointments;
+        public IMedicalRecordRepository MedicalRecords => _inner.MedicalRecords;
+        public IOtpCodeRepository OtpCodes => _inner.OtpCodes;
+        public INotificationRepository Notifications => _inner.Notifications;
+
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            throw new DbUpdateException("Simulated database failure during transaction.");
+        }
+
+        public Task BeginTransactionAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task CommitAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task RollbackAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public void Dispose() => _inner.Dispose();
+    }
+
+    [Fact]
+    public async Task SaveVisitAsync_WhenTransactionFails_RollsBackAndKeepsAppointmentConfirmed()
+    {
+        var (db, innerUow, _, doctor, _, appointment) = SetupEnvironment();
+
+        // Wrap UoW with a failing one
+        var failingUow = new FailingUnitOfWork(innerUow);
+        var serviceWithFailure = new MedicalRecordService(failingUow, db, NullLogger<MedicalRecordService>.Instance);
+
+        var dto = new SaveMedicalRecordDto
+        {
+            AppointmentId = appointment.Id,
+            DoctorUserId = doctor.UserId,
+            Diagnosis = "Hypertension check",
+            BloodPressure = "120/80"
+        };
+
+        // Assert that the exception propagates
+        await Assert.ThrowsAsync<DbUpdateException>(() => serviceWithFailure.SaveVisitAsync(dto));
+
+        // Create a clean new DbContext query to verify nothing was committed
+        var freshAppointment = await db.Appointments
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == appointment.Id);
+
+        Assert.NotNull(freshAppointment);
+        // NFR-15 / BR-05: Status must remain Confirmed, NOT Completed
+        Assert.Equal(AppointmentStatus.Confirmed, freshAppointment.Status);
+
+        // Medical record must NOT exist
+        var recordExists = await db.MedicalRecords
+            .AsNoTracking()
+            .AnyAsync(m => m.AppointmentId == appointment.Id);
+        Assert.False(recordExists);
     }
 }

@@ -434,4 +434,165 @@ public class AppointmentServiceTests
         // Verify email notification
         Assert.Contains(notif.SentCalls, c => c.StartsWith("AppointmentRejected:"));
     }
+
+    [Fact]
+    public async Task RescheduleAsync_ValidLeadTime_MovesAppointment_ReturnsToPending_AndSendsEmail()
+    {
+        var (db, _, service, notif, doctor, patient) = SetupEnvironment();
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3));
+        var newDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4));
+
+        // Working schedule on new date
+        db.DoctorSchedules.Add(new DoctorSchedule
+        {
+            DoctorId = doctor.Id,
+            DayOfWeek = (int)newDate.DayOfWeek,
+            StartTime = new TimeSpan(10, 0, 0),
+            EndTime = new TimeSpan(12, 0, 0),
+            SlotMinutes = 30
+        });
+
+        // Current confirmed appointment on today
+        var appt = new Appointment
+        {
+            DoctorId = doctor.Id,
+            PatientId = patient.Id,
+            AppointmentDate = today,
+            StartTime = new TimeSpan(10, 0, 0),
+            EndTime = new TimeSpan(10, 30, 0),
+            Status = AppointmentStatus.Confirmed
+        };
+        db.Appointments.Add(appt);
+        await db.SaveChangesAsync();
+
+        var rescheduleDto = new RescheduleAppointmentDto
+        {
+            AppointmentId = appt.Id,
+            PatientUserId = patient.UserId,
+            NewDate = newDate,
+            NewStartTime = new TimeSpan(11, 0, 0),
+            NewEndTime = new TimeSpan(11, 30, 0)
+        };
+
+        var result = await service.RescheduleAsync(rescheduleDto);
+
+        // BR-04: Rescheduling returns status to Pending
+        Assert.Equal(AppointmentStatus.Pending, result.Status);
+        Assert.Equal(newDate, result.AppointmentDate);
+        Assert.Equal(new TimeSpan(11, 0, 0), result.StartTime);
+
+        var updatedInDb = await db.Appointments.FindAsync(appt.Id);
+        Assert.NotNull(updatedInDb);
+        Assert.Equal(AppointmentStatus.Pending, updatedInDb.Status);
+        Assert.Equal(newDate, updatedInDb.AppointmentDate);
+
+        // Verify notification
+        Assert.Contains(notif.SentCalls, c => c.StartsWith("AppointmentRescheduled:"));
+    }
+
+    [Fact]
+    public async Task RescheduleAsync_Within2Hours_ThrowsLeadTimeViolationException()
+    {
+        var (db, _, service, _, doctor, patient) = SetupEnvironment();
+
+        var clinicNow = ScheduleService.GetClinicLocalNow();
+        var targetDateTime = clinicNow.AddMinutes(45); // Only 45 mins lead time
+        var apptDate = DateOnly.FromDateTime(targetDateTime);
+
+        var appt = new Appointment
+        {
+            DoctorId = doctor.Id,
+            PatientId = patient.Id,
+            AppointmentDate = apptDate,
+            StartTime = targetDateTime.TimeOfDay,
+            EndTime = targetDateTime.TimeOfDay.Add(TimeSpan.FromMinutes(30)),
+            Status = AppointmentStatus.Confirmed
+        };
+        db.Appointments.Add(appt);
+        await db.SaveChangesAsync();
+
+        var rescheduleDto = new RescheduleAppointmentDto
+        {
+            AppointmentId = appt.Id,
+            PatientUserId = patient.UserId,
+            NewDate = apptDate.AddDays(2),
+            NewStartTime = new TimeSpan(10, 0, 0),
+            NewEndTime = new TimeSpan(10, 30, 0)
+        };
+
+        var ex = await Assert.ThrowsAsync<LeadTimeViolationException>(() => service.RescheduleAsync(rescheduleDto));
+        Assert.Equal(2, ex.RequiredLeadHours);
+    }
+
+    [Fact]
+    public async Task AuditLogs_RecordedOnlyForConfirmRejectCancel_NeverForCreateOrReschedule()
+    {
+        var (db, _, service, _, doctor, patient) = SetupEnvironment();
+
+        var tomorrow = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
+        db.DoctorSchedules.Add(new DoctorSchedule
+        {
+            DoctorId = doctor.Id,
+            DayOfWeek = (int)tomorrow.DayOfWeek,
+            StartTime = new TimeSpan(9, 0, 0),
+            EndTime = new TimeSpan(12, 0, 0),
+            SlotMinutes = 30
+        });
+        await db.SaveChangesAsync();
+
+        // 1. Create appointment -> NO AuditLog
+        var created = await service.CreateAsync(new BookAppointmentDto
+        {
+            DoctorId = doctor.Id,
+            PatientUserId = patient.UserId,
+            AppointmentDate = tomorrow,
+            StartTime = new TimeSpan(9, 0, 0),
+            EndTime = new TimeSpan(9, 30, 0)
+        });
+
+        int auditCountAfterCreate = await db.AuditLogs.CountAsync();
+        Assert.Equal(0, auditCountAfterCreate);
+
+        // 2. Reschedule appointment -> NO AuditLog
+        await service.RescheduleAsync(new RescheduleAppointmentDto
+        {
+            AppointmentId = created.Id,
+            PatientUserId = patient.UserId,
+            NewDate = tomorrow,
+            NewStartTime = new TimeSpan(10, 0, 0),
+            NewEndTime = new TimeSpan(10, 30, 0)
+        });
+
+        int auditCountAfterReschedule = await db.AuditLogs.CountAsync();
+        Assert.Equal(0, auditCountAfterReschedule);
+
+        // 3. Confirm appointment -> MUST create 1 AuditLog
+        await service.ConfirmAsync(new ConfirmRejectDto
+        {
+            AppointmentId = created.Id,
+            UserId = doctor.UserId,
+            UserRole = "Doctor",
+            DoctorId = doctor.Id
+        });
+
+        int auditCountAfterConfirm = await db.AuditLogs.CountAsync();
+        Assert.Equal(1, auditCountAfterConfirm);
+        var confirmLog = await db.AuditLogs.FirstAsync();
+        Assert.Equal("Confirm", confirmLog.Action);
+
+        // 4. Cancel appointment -> MUST create another AuditLog
+        await service.CancelAsync(new CancelAppointmentDto
+        {
+            AppointmentId = created.Id,
+            UserId = patient.UserId,
+            UserRole = "Patient",
+            Reason = "Patient plan changed"
+        });
+
+        int auditCountAfterCancel = await db.AuditLogs.CountAsync();
+        Assert.Equal(2, auditCountAfterCancel);
+        var cancelLog = await db.AuditLogs.OrderByDescending(l => l.Id).FirstAsync();
+        Assert.Equal("Cancel", cancelLog.Action);
+    }
 }
