@@ -125,13 +125,8 @@
                 }
             </nav>
 
-            <!-- Bottom: support + sign out -->
+            <!-- Bottom: sign out -->
             <div class="mc-sidebar-footer">
-                <div class="mc-support-box">
-                    <p class="mc-support-title">A little help, anytime.</p>
-                    <p class="mc-support-sub">Your clinic support team is one message away.</p>
-                    <a href="#" class="mc-support-link">Contact support <i class="bi bi-box-arrow-up-right"></i></a>
-                </div>
                 <form asp-controller="Account" asp-action="Logout" method="post" class="mc-logout-form">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="mc-nav-item mc-logout-btn">

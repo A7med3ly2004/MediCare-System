@@ -62,6 +62,9 @@ In strict compliance with the **UI RULE** and **SPEC.md Out-of-Scope** constrain
 8. **Functional Topbar Notification Bell:**  
    - *Audit Check:* The bell icon was a static button.  
    - *Resolution:* Wired to role-based notification views (`/Admin/Notifications`, `/Doctor/Notifications`, `/Patient/Notifications`), allowing all roles to review their transactional email alerts.
+9. **Sidebar Support Card ("A little help, anytime." / "Contact support"):**  
+   - *Audit Check:* The static mockups contained a support card block at the bottom of the sidebar.  
+   - *Resolution:* Live chat, customer support ticketing, and messaging are explicitly out of scope per `docs/SPEC.md` and `AGENTS.md`. The placeholder support card was completely removed from the sidebar across `_Layout.cshtml`, ensuring no dead or non-functional links exist and leaving the `Sign out` action cleanly anchored at the bottom of the sidebar.
 
 ---
 
