@@ -59,7 +59,7 @@
                                     <span class="mc-text-secondary mc-fs-12 d-block">@a.StartTime.ToString(@"hh\:mm") – @a.EndTime.ToString(@"hh\:mm")</span>
                                 </td>
                                 <td>
-                                    <strong class="text-ink">Dr. @a.DoctorName</strong>
+                                    <strong class="text-ink">@DoctorNameFormatter.Format(a.DoctorName)</strong>
                                     <span class="mc-text-secondary mc-fs-12 d-block">@a.SpecializationName</span>
                                 </td>
                                 <td>

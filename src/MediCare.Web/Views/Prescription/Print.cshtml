@@ -138,7 +138,7 @@
                 <span class="text-secondary small d-block">Tel: +20 (02) 2345 6789 · info@medicare.eg</span>
             </div>
             <div class="text-end">
-                <h2 class="h5 fw-bold text-ink mb-1">Dr. @Model.DoctorName</h2>
+                <h2 class="h5 fw-bold text-ink mb-1">@DoctorNameFormatter.Format(Model.DoctorName)</h2>
                 <span class="badge" style="background-color: #EAF4FA; color: #2D7DD2; font-size: 13px;">
                     @Model.DoctorSpecialization
                 </span>
@@ -232,7 +232,7 @@
             </div>
             <div>
                 <div class="signature-line">
-                    <strong class="d-block text-ink">Dr. @Model.DoctorName</strong>
+                    <strong class="d-block text-ink">@DoctorNameFormatter.Format(Model.DoctorName)</strong>
                     <span class="text-secondary small">@Model.DoctorSpecialization</span>
                 </div>
             </div>

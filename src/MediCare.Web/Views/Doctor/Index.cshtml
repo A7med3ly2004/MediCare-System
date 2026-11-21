@@ -2,7 +2,7 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Doctor Dashboard";
-    var doctorName = !string.IsNullOrEmpty(Model.DoctorName) ? Model.DoctorName : (User.Identity?.Name ?? "Doctor");
+    var doctorDisplayName = DoctorNameFormatter.Format(!string.IsNullOrEmpty(Model.DoctorName) ? Model.DoctorName : (User.Identity?.Name ?? "Doctor"));
     var specialty = !string.IsNullOrEmpty(Model.SpecializationName) ? Model.SpecializationName : "General Practice";
     var room = !string.IsNullOrEmpty(Model.RoomNumber) ? Model.RoomNumber : "Room 02";
     var dayLabel = DateTime.Today.ToString("dddd").ToUpperInvariant();
@@ -14,7 +14,7 @@
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <span class="mc-page-label">@dayLabel AT AL NOUR CLINIC</span>
-                <h1 class="mc-page-title mb-1">Good morning, Dr. @doctorName.</h1>
+                <h1 class="mc-page-title mb-1">Good morning, @doctorDisplayName.</h1>
                 <p class="mc-page-subtitle mb-0">Your clinical schedule and patient consultation overview</p>
             </div>
             <div>

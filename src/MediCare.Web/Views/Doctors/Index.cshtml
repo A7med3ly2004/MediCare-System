@@ -146,7 +146,7 @@
                                     </div>
                                 }
                                 <div class="overflow-hidden">
-                                    <h2 class="h6 fw-bold text-ink mb-1 text-truncate" title="@doc.FullName">@doc.FullName</h2>
+                                    <h2 class="h6 fw-bold text-ink mb-1 text-truncate" title="@DoctorNameFormatter.Format(doc.FullName)">@DoctorNameFormatter.Format(doc.FullName)</h2>
                                     <p class="mc-text-secondary mc-fs-13 mb-1 text-truncate">@doc.SpecializationName</p>
                                     <p class="mc-text-secondary mc-fs-12 mb-0 text-truncate">
                                         <i class="bi bi-geo-alt me-1"></i>@doc.Location @(!string.IsNullOrEmpty(doc.RoomNumber) ? $"· {doc.RoomNumber}" : "")

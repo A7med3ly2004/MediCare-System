@@ -138,7 +138,7 @@
                                 @next.AppointmentDate.ToString("dddd, dd MMMM yyyy") at @next.StartTime.ToString(@"hh\:mm")
                             </h4>
                             <span class="text-secondary small">
-                                Dr. @next.DoctorName · Room @(string.IsNullOrEmpty(next.RoomNumber) ? "02" : next.RoomNumber) · @(!string.IsNullOrEmpty(next.Notes) ? next.Notes : "Consultation")
+                                @DoctorNameFormatter.Format(next.DoctorName) · Room @(string.IsNullOrEmpty(next.RoomNumber) ? "02" : next.RoomNumber) · @(!string.IsNullOrEmpty(next.Notes) ? next.Notes : "Consultation")
                             </span>
                         </div>
                         @if (next.Status == MediCare.Data.Entities.AppointmentStatus.Confirmed)
@@ -183,7 +183,7 @@
                                             }
                                         </div>
                                         <span class="text-secondary small">
-                                            @rec.AppointmentDate.ToString("dd MMM yyyy") at @rec.FormattedTime · Dr. @rec.DoctorName (@rec.DoctorSpecialization)
+                                            @rec.AppointmentDate.ToString("dd MMM yyyy") at @rec.FormattedTime · @DoctorNameFormatter.Format(rec.DoctorName) (@rec.DoctorSpecialization)
                                         </span>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">

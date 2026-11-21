@@ -126,4 +126,9 @@ public class NotificationService : INotificationService
 
         return sent;
     }
+
+    public async Task<IEnumerable<Notification>> GetNotificationsByUserAsync(string userId, CancellationToken ct = default)
+    {
+        return await _uow.Notifications.GetByUserAsync(userId, ct);
+    }
 }

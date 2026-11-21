@@ -1,3 +1,5 @@
+using MediCare.Data.Entities;
+
 namespace MediCare.Services.Interfaces;
 
 /// <summary>
@@ -29,4 +31,8 @@ public interface INotificationService
 
     Task<bool> SendReminderAsync(
         string userId, string toEmail, string recipientName, string doctorName, DateOnly date, TimeSpan startTime, TimeSpan endTime, string? room);
+
+    /// <summary>Retrieves sent/pending notifications for a specific user.</summary>
+    Task<IEnumerable<Notification>> GetNotificationsByUserAsync(string userId, CancellationToken ct = default)
+        => Task.FromResult(Enumerable.Empty<Notification>());
 }

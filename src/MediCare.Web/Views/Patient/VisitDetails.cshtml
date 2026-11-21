@@ -24,7 +24,7 @@
                 <span class="mc-badge mc-badge--completed mb-2 d-inline-block">Completed Visit</span>
                 <h1 class="h4 fw-bold text-ink mb-1">@Model.Diagnosis</h1>
                 <p class="text-secondary small mb-0">
-                    Consultation with <strong>Dr. @Model.DoctorName</strong> (@Model.DoctorSpecialization) on @Model.AppointmentDate.ToString("dddd, dd MMMM yyyy") at @Model.FormattedTime
+                    Consultation with <strong>@DoctorNameFormatter.Format(Model.DoctorName)</strong> (@Model.DoctorSpecialization) on @Model.AppointmentDate.ToString("dddd, dd MMMM yyyy") at @Model.FormattedTime
                 </p>
             </div>
             <div class="text-md-end">
@@ -136,7 +136,7 @@
                         @(Model.DoctorName.Length > 0 ? Model.DoctorName.Substring(0, 1) : "D")
                     </div>
                     <div>
-                        <strong class="d-block text-ink">Dr. @Model.DoctorName</strong>
+                        <strong class="d-block text-ink">@DoctorNameFormatter.Format(Model.DoctorName)</strong>
                         <span class="text-secondary small">@Model.DoctorSpecialization</span>
                     </div>
                 </div>

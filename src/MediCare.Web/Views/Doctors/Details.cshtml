@@ -46,7 +46,7 @@
 
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                        <h2 class="h4 fw-bold text-ink mb-0">Dr. @Model.Doctor.FullName</h2>
+                        <h2 class="h4 fw-bold text-ink mb-0">@DoctorNameFormatter.Format(Model.Doctor.FullName)</h2>
                         @if (Model.Doctor.IsAvailableToday)
                         {
                             <span class="mc-badge mc-badge--available">Available</span>
@@ -98,9 +98,9 @@
         <div class="col-12 col-lg-7 col-xl-8">
             <!-- About Doctor Card -->
             <div class="mc-card p-4 mb-4" id="about">
-                <h3 class="h6 fw-bold text-ink mb-3">About Dr. @Model.Doctor.FullName</h3>
+                <h3 class="h6 fw-bold text-ink mb-3">About @DoctorNameFormatter.Format(Model.Doctor.FullName)</h3>
                 <p class="mc-text-secondary mc-fs-14 lh-base mb-4">
-                    Dr. @Model.Doctor.FullName is a distinguished consultant in @Model.Doctor.SpecializationName at Al Nour Clinic.
+                    @DoctorNameFormatter.Format(Model.Doctor.FullName) is a distinguished consultant in @Model.Doctor.SpecializationName at Al Nour Clinic.
                     Committed to providing comprehensive, evidence-based diagnostic and treatment services with personalized patient care.
                 </p>
 
@@ -348,7 +348,7 @@
                     <div class="p-3 rounded mb-3" style="background-color: var(--mc-canvas); border: 1px solid var(--mc-hairline);">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="mc-text-secondary mc-fs-12">Doctor:</span>
-                            <strong class="text-ink mc-fs-13">Dr. @Model.Doctor.FullName</strong>
+                            <strong class="text-ink mc-fs-13">@DoctorNameFormatter.Format(Model.Doctor.FullName)</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="mc-text-secondary mc-fs-12">Specialization:</span>
@@ -373,7 +373,7 @@
                         <textarea name="Notes"
                                   class="form-control"
                                   rows="3"
-                                  placeholder="Briefly describe your symptoms or reason for consulting Dr. @Model.Doctor.FullName…"></textarea>
+                                  placeholder="Briefly describe your symptoms or reason for consulting @DoctorNameFormatter.Format(Model.Doctor.FullName)…"></textarea>
                     </div>
 
                     <p class="mc-text-secondary mc-fs-11 mb-0">

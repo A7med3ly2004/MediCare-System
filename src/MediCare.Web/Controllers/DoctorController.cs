@@ -575,7 +575,11 @@ public class DoctorController : Controller
     }
 
     [HttpGet]
-    public IActionResult Messages() => RedirectToAction(nameof(Index));
+    public IActionResult Messages()
+    {
+        TempData["Info"] = "Messaging is not part of this clinic release.";
+        return RedirectToAction(nameof(Index));
+    }
 
     [HttpGet]
     public IActionResult Profile() => RedirectToAction("Edit", "Doctors");
