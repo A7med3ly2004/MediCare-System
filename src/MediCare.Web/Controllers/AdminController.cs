@@ -359,7 +359,7 @@ public class AdminController : Controller
         ViewData["Title"] = "Specializations";
         ViewData["PortalLabel"] = "Clinic Administration";
         ViewData["PageLabel"] = "Specializations Setup";
-        ViewData["ActiveNav"] = "doctors";
+        ViewData["ActiveNav"] = "specializations";
 
         var specs = await _adminManagementService.GetSpecializationsAsync(ct);
         var vm = new AdminSpecializationsViewModel

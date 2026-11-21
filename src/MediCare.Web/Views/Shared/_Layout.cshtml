@@ -59,9 +59,9 @@
                        asp-controller="Admin" asp-action="Doctors">
                         <i class="bi bi-person-badge"></i> <span>Doctors</span>
                     </a>
-                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "schedule" ? "active" : "")"
-                       asp-controller="Admin" asp-action="Schedule">
-                        <i class="bi bi-clock"></i> <span>Schedule</span>
+                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "specializations" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Specializations">
+                        <i class="bi bi-tags"></i> <span>Specializations</span>
                     </a>
                     <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "reports" ? "active" : "")"
                        asp-controller="Admin" asp-action="Reports">
@@ -70,10 +70,6 @@
                     <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "notifications" ? "active" : "")"
                        asp-controller="Admin" asp-action="Notifications">
                         <i class="bi bi-bell"></i> <span>Notifications</span>
-                    </a>
-                    <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "settings" ? "active" : "")"
-                       asp-controller="Admin" asp-action="Settings">
-                        <i class="bi bi-gear"></i> <span>Settings</span>
                     </a>
                 }
                 else if (User.IsInRole("Doctor"))
