@@ -57,4 +57,40 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }, 6000);
     });
+
+    // Initialize theme icon state
+    updateThemeIcons();
 });
+
+// ─── Theme Management (Dark / Light Mode - NFR-12) ──────────────────────────
+function getPreferredTheme() {
+    return localStorage.getItem('medicare-theme') ||
+        (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('medicare-theme', theme);
+    updateThemeIcons();
+}
+
+function updateThemeIcons() {
+    const currentTheme = document.documentElement.getAttribute('data-bs-theme') || 'light';
+    const toggles = document.querySelectorAll('.mc-theme-toggle i');
+    toggles.forEach(function (icon) {
+        if (currentTheme === 'dark') {
+            icon.classList.remove('bi-moon');
+            icon.classList.add('bi-sun');
+        } else {
+            icon.classList.remove('bi-sun');
+            icon.classList.add('bi-moon');
+        }
+    });
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-bs-theme') || 'light';
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+}
