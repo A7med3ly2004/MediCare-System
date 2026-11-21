@@ -41,6 +41,7 @@ public class SpecializationPopularityDto
 {
     public int SpecializationId { get; set; }
     public string SpecializationName { get; set; } = string.Empty;
+    public string Specialization => SpecializationName;
     public int AppointmentCount { get; set; }
     public int DoctorCount { get; set; }
 }
@@ -72,18 +73,32 @@ public class AdminDashboardDto
     // Chart.js data series
     public List<string> ActivityDays { get; set; } = new();
     public List<int> ActivityCounts { get; set; } = new();
+    public List<string> ActivityChartDays => ActivityDays;
+    public List<int> ActivityChartConfirmed => ActivityCounts;
+    public List<int> ActivityChartCancelled { get; set; } = new();
 
     public List<string> WeeklyDays { get; set; } = new();
     public List<int> WeeklyCounts { get; set; } = new();
+    public List<string> WeeklyBreakdownDays => WeeklyDays;
+    public List<int> WeeklyBreakdownCounts => WeeklyCounts;
 
     public List<AppointmentListItemDto> UpcomingAppointments { get; set; } = new();
+    public List<AppointmentListItemDto> TodayAppointments => UpcomingAppointments;
     public List<DoctorAvailabilityItemDto> DoctorAvailabilities { get; set; } = new();
+
+    // Convenience aliases
+    public int AvailableDoctorsToday => AvailableDoctorsCount;
+    public int TotalDoctors => TotalDoctorsCount;
+    public int PendingAppointmentsToday => PendingConfirmationsCount;
+    public int ConfirmedAppointmentsToday => Math.Max(0, TodayAppointmentsCount - PendingConfirmationsCount);
+    public int MonthlyAppointmentsCount => MonthlyCompletedVisits;
 }
 
 public class DoctorAvailabilityItemDto
 {
     public int DoctorId { get; set; }
     public string DoctorName { get; set; } = string.Empty;
+    public string? ProfileImage { get; set; }
     public string Specialization { get; set; } = string.Empty;
     public bool IsAvailableToday { get; set; }
     public string WorkingHoursText { get; set; } = string.Empty;
@@ -95,6 +110,7 @@ public class AnalyticsReportDto
     public DailyReportDto DailySummary { get; set; } = new();
     public List<MonthlyTrendDto> MonthlyTrends { get; set; } = new();
     public List<DoctorPerformanceDto> DoctorPerformances { get; set; } = new();
+    public List<DoctorPerformanceDto> TopDoctors => DoctorPerformances;
     public List<SpecializationPopularityDto> PopularSpecializations { get; set; } = new();
     public List<PatientGrowthDto> PatientGrowth { get; set; } = new();
 }
@@ -108,6 +124,8 @@ public class PagedResult<T>
     public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
     public bool HasPreviousPage => PageNumber > 1;
     public bool HasNextPage => PageNumber < TotalPages;
+    public bool HasPrevious => HasPreviousPage;
+    public bool HasNext => HasNextPage;
 }
 
 public class DoctorAdminListItemDto
@@ -116,13 +134,16 @@ public class DoctorAdminListItemDto
     public string UserId { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    public string? ProfileImage { get; set; }
     public string SpecializationName { get; set; } = string.Empty;
+    public string Specialization => SpecializationName;
     public int? SpecializationId { get; set; }
     public string Location { get; set; } = string.Empty;
     public string? RoomNumber { get; set; }
     public decimal ConsultationFee { get; set; }
     public bool IsSuspended { get; set; }
     public bool IsDeleted { get; set; }
+    public bool IsEmailVerified { get; set; }
     public int ActiveAppointmentsCount { get; set; }
     public DateTime CreatedAt { get; set; }
 }
@@ -137,6 +158,8 @@ public class PatientAdminListItemDto
     public string? PhoneNumber { get; set; }
     public DateOnly DateOfBirth { get; set; }
     public string? BloodGroup { get; set; }
+    public string? Allergies { get; set; }
+    public string? MedicalHistory { get; set; }
     public bool IsSuspended { get; set; }
     public bool IsDeleted { get; set; }
     public int ActiveAppointmentsCount { get; set; }

@@ -1,0 +1,195 @@
+@model MediCare.Web.ViewModels.Admin.AdminDoctorsListViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Doctor Directory";
+    var paging = Model.Paging;
+}
+
+<div class="mc-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="mc-page-label">MEDICAL STAFF</span>
+            <h1 class="mc-page-title mb-1">Doctor Directory</h1>
+            <p class="mc-page-subtitle">Manage medical practitioners, consult fees, room allocations, and credentials</p>
+        </div>
+        <div>
+            <a asp-controller="Admin" asp-action="Specializations" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-tags me-1"></i> Specializations Setup
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Card -->
+<div class="mc-card p-3 mb-4">
+    <form method="get" asp-controller="Admin" asp-action="Doctors" class="row g-2 align-items-center">
+        <div class="col-12 col-md-4">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search by doctor name or email..." />
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+            <select name="specializationId" class="form-select form-select-sm">
+                <option value="">All Specializations</option>
+                @foreach (var spec in Model.Specializations)
+                {
+                    <option value="@spec.Id" selected="@(Model.SpecializationId == spec.Id ? "selected" : null)">@spec.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+            <select name="isSuspended" class="form-select form-select-sm">
+                <option value="">All Account Statuses</option>
+                <option value="false" selected="@(Model.IsSuspended == false ? "selected" : null)">Active Accounts Only</option>
+                <option value="true" selected="@(Model.IsSuspended == true ? "selected" : null)">Suspended Accounts Only</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm flex-fill">Filter</button>
+            <a asp-controller="Admin" asp-action="Doctors" class="btn btn-light btn-sm border">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Doctors Table -->
+<div class="mc-card p-4">
+    @if (paging.Items.Count == 0)
+    {
+        <div class="p-5 text-center text-secondary">
+            <i class="bi bi-person-x fs-2 text-muted d-block mb-2"></i>
+            <p class="mb-0">No doctors found matching the search criteria.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mc-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Doctor</th>
+                        <th>Specialization</th>
+                        <th>Location & Room</th>
+                        <th>Consultation Fee</th>
+                        <th>Account Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doc in paging.Items)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (!string.IsNullOrEmpty(doc.ProfileImage))
+                                    {
+                                        <img src="@doc.ProfileImage" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" alt="@doc.FullName" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 40px; height: 40px; background-color: var(--mc-primary-light);">
+                                            @doc.FullName.Substring(0, Math.Min(2, doc.FullName.Length))
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="fw-semibold text-ink">@doc.FullName</div>
+                                        <div class="text-secondary small">@doc.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-ink border">@doc.SpecializationName</span>
+                            </td>
+                            <td>
+                                <div class="text-ink small">@doc.Location</div>
+                                @if (!string.IsNullOrEmpty(doc.RoomNumber))
+                                {
+                                    <span class="text-secondary small">Room @doc.RoomNumber</span>
+                                }
+                            </td>
+                            <td class="fw-semibold text-ink">
+                                @doc.ConsultationFee.ToString("N0") EGP
+                            </td>
+                            <td>
+                                @if (doc.IsSuspended)
+                                {
+                                    <span class="badge" style="background-color: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5;">
+                                        <i class="bi bi-slash-circle me-1"></i> Suspended
+                                    </span>
+                                }
+                                else if (!doc.IsEmailVerified)
+                                {
+                                    <span class="badge" style="background-color: #FFFBEB; color: #D97706; border: 1px solid #FDE68A;">
+                                        Pending Verify
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge" style="background-color: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0;">
+                                        <i class="bi bi-check-circle me-1"></i> Active
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <a asp-controller="Admin" asp-action="EditDoctor" asp-route-id="@doc.Id" class="btn btn-outline-secondary btn-sm" title="Edit Profile">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+                                    <!-- Suspend / Unsuspend Toggle -->
+                                    <form asp-controller="Admin" asp-action="ToggleDoctorSuspend" asp-route-id="@doc.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        @if (doc.IsSuspended)
+                                        {
+                                            <button type="submit" class="btn btn-outline-success btn-sm" title="Unsuspend Doctor">
+                                                <i class="bi bi-unlock"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="btn btn-outline-warning btn-sm" title="Suspend Doctor" onclick="return confirm('Suspend doctor @doc.FullName from logging in?');">
+                                                <i class="bi bi-pause-circle"></i>
+                                            </button>
+                                        }
+                                    </form>
+
+                                    <!-- Delete Button (BR-07) -->
+                                    <form asp-controller="Admin" asp-action="DeleteDoctor" asp-route-id="@doc.Id" method="post" class="d-inline" onsubmit="return confirm('Permanently soft-delete doctor @doc.FullName? Note: Cannot be deleted if they have future appointments.');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Profile">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (paging.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <span class="text-secondary small">Showing page @paging.PageNumber of @paging.TotalPages (@paging.TotalCount total doctors)</span>
+                <nav aria-label="Doctors pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!paging.HasPrevious ? "disabled" : "")">
+                            <a class="page-link" asp-controller="Admin" asp-action="Doctors" asp-route-page="@(paging.PageNumber - 1)" asp-route-search="@Model.Search" asp-route-specializationId="@Model.SpecializationId" asp-route-isSuspended="@Model.IsSuspended">Previous</a>
+                        </li>
+                        @for (int p = 1; p <= paging.TotalPages; p++)
+                        {
+                            <li class="page-item @(p == paging.PageNumber ? "active" : "")">
+                                <a class="page-link" asp-controller="Admin" asp-action="Doctors" asp-route-page="@p" asp-route-search="@Model.Search" asp-route-specializationId="@Model.SpecializationId" asp-route-isSuspended="@Model.IsSuspended">@p</a>
+                            </li>
+                        }
+                        <li class="page-item @(!paging.HasNext ? "disabled" : "")">
+                            <a class="page-link" asp-controller="Admin" asp-action="Doctors" asp-route-page="@(paging.PageNumber + 1)" asp-route-search="@Model.Search" asp-route-specializationId="@Model.SpecializationId" asp-route-isSuspended="@Model.IsSuspended">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+</div>

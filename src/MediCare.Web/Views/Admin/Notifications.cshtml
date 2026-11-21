@@ -1,0 +1,158 @@
+@model MediCare.Web.ViewModels.Admin.AdminNotificationsListViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Notification History";
+    var paging = Model.Paging;
+}
+
+<div class="mc-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="mc-page-label">COMMUNICATIONS & AUDIT</span>
+            <h1 class="mc-page-title mb-1">Email Notification Log</h1>
+            <p class="mc-page-subtitle">Track transactional emails, OTP deliveries, status updates, and failed dispatches (FR-28)</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="mc-card p-3 mb-4">
+    <form method="get" asp-controller="Admin" asp-action="Notifications" class="row g-2 align-items-center">
+        <div class="col-12 col-sm-6 col-md-4">
+            <select name="status" class="form-select form-select-sm">
+                <option value="">All Delivery Statuses</option>
+                <option value="Sent" selected="@(Model.Status == "Sent" ? "selected" : null)">Sent Successfully</option>
+                <option value="Failed" selected="@(Model.Status == "Failed" ? "selected" : null)">Failed Delivery</option>
+                <option value="Pending" selected="@(Model.Status == "Pending" ? "selected" : null)">Pending Dispatch</option>
+            </select>
+        </div>
+        <div class="col-12 col-sm-6 col-md-5">
+            <select name="type" class="form-select form-select-sm">
+                <option value="">All Notification Types</option>
+                <option value="OtpCode" selected="@(Model.Type == "OtpCode" ? "selected" : null)">OTP Verification Code</option>
+                <option value="AppointmentBooked" selected="@(Model.Type == "AppointmentBooked" ? "selected" : null)">Appointment Booked</option>
+                <option value="AppointmentConfirmed" selected="@(Model.Type == "AppointmentConfirmed" ? "selected" : null)">Appointment Confirmed</option>
+                <option value="AppointmentRejected" selected="@(Model.Type == "AppointmentRejected" ? "selected" : null)">Appointment Rejected</option>
+                <option value="AppointmentCancelled" selected="@(Model.Type == "AppointmentCancelled" ? "selected" : null)">Appointment Cancelled</option>
+                <option value="AppointmentRescheduled" selected="@(Model.Type == "AppointmentRescheduled" ? "selected" : null)">Appointment Rescheduled</option>
+                <option value="AppointmentReminder" selected="@(Model.Type == "AppointmentReminder" ? "selected" : null)">Appointment Reminder (24h)</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm flex-fill">Filter Logs</button>
+            <a asp-controller="Admin" asp-action="Notifications" class="btn btn-light btn-sm border">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Notifications Table -->
+<div class="mc-card p-4">
+    @if (paging.Items.Count == 0)
+    {
+        <div class="p-5 text-center text-secondary">
+            <i class="bi bi-inbox fs-2 text-muted d-block mb-2"></i>
+            <p class="mb-0">No notification logs recorded for this selection.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mc-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Time (UTC)</th>
+                        <th>Recipient</th>
+                        <th>Type</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var n in paging.Items)
+                    {
+                        <tr>
+                            <td class="text-nowrap small">
+                                <span class="fw-semibold text-ink d-block">@n.CreatedAt.ToString("yyyy-MM-dd")</span>
+                                <span class="text-secondary">@n.CreatedAt.ToString("HH:mm:ss") UTC</span>
+                            </td>
+                            <td>
+                                <div class="fw-medium text-ink small">@n.RecipientName</div>
+                                <span class="text-secondary small">@n.RecipientEmail</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-ink border" style="font-size: 11px;">@n.Type</span>
+                            </td>
+                            <td>
+                                <span class="text-ink small">@n.Subject</span>
+                            </td>
+                            <td>
+                                @if (n.Status == "Sent")
+                                {
+                                    <span class="badge" style="background-color: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0;">
+                                        <i class="bi bi-check2-all me-1"></i> Sent
+                                    </span>
+                                    @if (n.SentAt.HasValue)
+                                    {
+                                        <span class="text-muted d-block" style="font-size: 10px;">@n.SentAt.Value.ToString("HH:mm:ss")</span>
+                                    }
+                                }
+                                else if (n.Status == "Failed")
+                                {
+                                    <span class="badge" style="background-color: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5;">
+                                        <i class="bi bi-exclamation-octagon me-1"></i> Failed
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge" style="background-color: #FFFBEB; color: #D97706; border: 1px solid #FDE68A;">
+                                        Pending
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (n.Status == "Failed" || n.Status == "Pending")
+                                {
+                                    <form asp-controller="Admin" asp-action="ResendNotification" asp-route-id="@n.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 11px;" title="Resend Email">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Resend
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (paging.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <span class="text-secondary small">Showing page @paging.PageNumber of @paging.TotalPages (@paging.TotalCount notifications)</span>
+                <nav aria-label="Notifications pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!paging.HasPrevious ? "disabled" : "")">
+                            <a class="page-link" asp-controller="Admin" asp-action="Notifications" asp-route-page="@(paging.PageNumber - 1)" asp-route-status="@Model.Status" asp-route-type="@Model.Type">Previous</a>
+                        </li>
+                        @for (int p = 1; p <= paging.TotalPages; p++)
+                        {
+                            <li class="page-item @(p == paging.PageNumber ? "active" : "")">
+                                <a class="page-link" asp-controller="Admin" asp-action="Notifications" asp-route-page="@p" asp-route-status="@Model.Status" asp-route-type="@Model.Type">@p</a>
+                            </li>
+                        }
+                        <li class="page-item @(!paging.HasNext ? "disabled" : "")">
+                            <a class="page-link" asp-controller="Admin" asp-action="Notifications" asp-route-page="@(paging.PageNumber + 1)" asp-route-status="@Model.Status" asp-route-type="@Model.Type">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+</div>

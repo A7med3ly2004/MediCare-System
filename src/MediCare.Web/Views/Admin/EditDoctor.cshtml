@@ -1,0 +1,87 @@
+@model MediCare.Web.ViewModels.Admin.AdminEditDoctorViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Edit Doctor";
+}
+
+<div class="mc-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span class="mc-page-label">MEDICAL STAFF</span>
+            <h1 class="mc-page-title mb-1">Edit Doctor Profile</h1>
+            <p class="mc-page-subtitle">Update credentials, consulting rates, and room assignment</p>
+        </div>
+        <a asp-controller="Admin" asp-action="Doctors" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Directory
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="mc-card p-4">
+            <form asp-controller="Admin" asp-action="EditDoctor" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Email" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 mb-3 small"></div>
+
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label small fw-semibold text-ink">Doctor Full Name <span class="text-danger">*</span></label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-ink">Email Address</label>
+                    <input value="@Model.Email" class="form-control bg-light" disabled />
+                    <span class="form-text text-muted small">Email accounts are managed via Identity security.</span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SpecializationId" class="form-label small fw-semibold text-ink">Clinical Specialization <span class="text-danger">*</span></label>
+                    <select asp-for="SpecializationId" class="form-select">
+                        <option value="">Select Specialization...</option>
+                        @foreach (var spec in Model.AvailableSpecializations)
+                        {
+                            <option value="@spec.Id" selected="@(Model.SpecializationId == spec.Id ? "selected" : null)">@spec.Name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="SpecializationId" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label asp-for="Location" class="form-label small fw-semibold text-ink">Clinic Location / City <span class="text-danger">*</span></label>
+                        <input asp-for="Location" class="form-control" placeholder="e.g. Cairo Branch, Nasr City" />
+                        <span asp-validation-for="Location" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label asp-for="RoomNumber" class="form-label small fw-semibold text-ink">Room Number</label>
+                        <input asp-for="RoomNumber" class="form-control" placeholder="e.g. 204" />
+                        <span asp-validation-for="RoomNumber" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ConsultationFee" class="form-label small fw-semibold text-ink">Consultation Fee (EGP) <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input asp-for="ConsultationFee" class="form-control" type="number" step="10" min="0" />
+                        <span class="input-group-text">EGP</span>
+                    </div>
+                    <span asp-validation-for="ConsultationFee" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-controller="Admin" asp-action="Doctors" class="btn btn-light border">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

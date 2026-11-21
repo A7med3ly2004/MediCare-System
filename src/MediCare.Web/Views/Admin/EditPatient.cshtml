@@ -1,0 +1,88 @@
+@model MediCare.Web.ViewModels.Admin.AdminEditPatientViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Edit Patient";
+}
+
+<div class="mc-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span class="mc-page-label">CLINIC PATIENTS</span>
+            <h1 class="mc-page-title mb-1">Edit Patient Profile</h1>
+            <p class="mc-page-subtitle">Update contact details, medical conditions, and clinical notes</p>
+        </div>
+        <a asp-controller="Admin" asp-action="Patients" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Patients
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="mc-card p-4">
+            <form asp-controller="Admin" asp-action="EditPatient" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Email" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 mb-3 small"></div>
+
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label small fw-semibold text-ink">Full Name <span class="text-danger">*</span></label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-ink">Email Address</label>
+                    <input value="@Model.Email" class="form-control bg-light" disabled />
+                    <span class="form-text text-muted small">Email accounts are managed via Identity authentication.</span>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label asp-for="PhoneNumber" class="form-label small fw-semibold text-ink">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="+20 100 000 0000" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label asp-for="BloodGroup" class="form-label small fw-semibold text-ink">Blood Group</label>
+                        <select asp-for="BloodGroup" class="form-select">
+                            <option value="">Unknown / Not Set</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                        <span asp-validation-for="BloodGroup" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Allergies" class="form-label small fw-semibold text-ink">Known Allergies</label>
+                    <textarea asp-for="Allergies" class="form-control" rows="2" placeholder="e.g. Penicillin, Peanuts, Latex..."></textarea>
+                    <span asp-validation-for="Allergies" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="MedicalHistory" class="form-label small fw-semibold text-ink">Medical History</label>
+                    <textarea asp-for="MedicalHistory" class="form-control" rows="3" placeholder="Chronic conditions, prior surgeries, medication notes..."></textarea>
+                    <span asp-validation-for="MedicalHistory" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-controller="Admin" asp-action="Patients" class="btn btn-light border">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

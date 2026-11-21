@@ -1,21 +1,24 @@
+@model MediCare.Web.ViewModels.Admin.AdminDashboardViewModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Clinic Overview";
-    var totalPatients = ViewBag.TotalPatients as int? ?? 10;
-    var totalDoctors = ViewBag.TotalDoctors as int? ?? 6;
+    ViewData["Title"] = "Admin Overview";
+    var data = Model.DashboardData;
 }
 
 <div class="mc-page-header mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <span class="mc-page-label">YOUR CLINIC, AT A GLANCE</span>
-            <h1 class="mc-page-title mb-1">Good morning, Clinic Administrator.</h1>
-            <p class="mc-page-subtitle">A clear view of today's care and clinic operations</p>
+            <span class="mc-page-label">CLINIC WORKSPACE</span>
+            <h1 class="mc-page-title mb-1">Executive Overview</h1>
+            <p class="mc-page-subtitle">Real-time status of clinic capacity, schedules, and patient volume</p>
         </div>
-        <div>
-            <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-confirmed-text); font-size: 13px; padding: 8px 14px;">
-                <i class="bi bi-shield-check me-1"></i> Admin Portal Active
-            </span>
+        <div class="d-flex align-items-center gap-2">
+            <a class="btn btn-outline-secondary btn-sm" asp-controller="Admin" asp-action="Reports">
+                <i class="bi bi-file-earmark-bar-graph me-1"></i> Reports & Analytics
+            </a>
+            <a class="btn btn-primary btn-sm" asp-controller="Admin" asp-action="Appointments">
+                <i class="bi bi-calendar-check me-1"></i> Manage Appointments
+            </a>
         </div>
     </div>
 </div>
@@ -24,109 +27,298 @@
 <div class="row g-3 mb-4">
     <div class="col-12 col-sm-6 col-xl-3">
         <div class="mc-card p-4 h-100">
-            <span class="d-block text-secondary small mb-1">Total registered patients</span>
-            <div class="display-6 fw-bold text-ink mb-1">@totalPatients</div>
-            <span class="text-secondary small">Active clinic records</span>
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-secondary small fw-medium">Total registered patients</span>
+                <span class="badge bg-light text-primary"><i class="bi bi-people"></i></span>
+            </div>
+            <div class="display-6 fw-bold text-ink mb-1">@data.TotalPatients.ToString("N0")</div>
+            <span class="text-success small fw-medium">
+                <i class="bi bi-arrow-up-short"></i> +@data.NewPatientsThisMonth new this month
+            </span>
         </div>
     </div>
 
     <div class="col-12 col-sm-6 col-xl-3">
         <div class="mc-card p-4 h-100">
-            <span class="d-block text-secondary small mb-1">Today's appointments</span>
-            <div class="display-6 fw-bold text-ink mb-1">32</div>
-            <span class="text-secondary small">12 completed · 20 remaining</span>
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-secondary small fw-medium">Today's appointments</span>
+                <span class="badge bg-light text-primary"><i class="bi bi-calendar-event"></i></span>
+            </div>
+            <div class="display-6 fw-bold text-ink mb-1">@data.TodayAppointmentsCount</div>
+            <span class="text-secondary small">
+                <strong>@data.PendingAppointmentsToday</strong> pending · <strong>@data.ConfirmedAppointmentsToday</strong> confirmed
+            </span>
         </div>
     </div>
 
     <div class="col-12 col-sm-6 col-xl-3">
         <div class="mc-card p-4 h-100">
-            <span class="d-block text-secondary small mb-1">Active medical staff</span>
-            <div class="display-6 fw-bold text-ink mb-1">@totalDoctors / @totalDoctors</div>
-            <span class="text-secondary small">Across 10 clinic specialties</span>
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-secondary small fw-medium">Doctors on duty</span>
+                <span class="badge bg-light text-primary"><i class="bi bi-person-badge"></i></span>
+            </div>
+            <div class="display-6 fw-bold text-ink mb-1">@data.AvailableDoctorsToday <span class="fs-6 text-secondary fw-normal">/ @data.TotalDoctors</span></div>
+            <span class="text-secondary small">Active practitioners today</span>
         </div>
     </div>
 
     <div class="col-12 col-sm-6 col-xl-3">
         <div class="mc-card p-4 h-100">
-            <span class="d-block text-secondary small mb-1">Monthly clinic volume</span>
-            <div class="display-6 fw-bold text-ink mb-1" style="font-size: 26px;">168,400 EGP</div>
-            <span class="text-secondary small">October 2026 · +12.4% vs Sep</span>
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-secondary small fw-medium">Monthly volume</span>
+                <span class="badge bg-light text-primary"><i class="bi bi-graph-up"></i></span>
+            </div>
+            <div class="display-6 fw-bold text-ink mb-1">@data.MonthlyAppointmentsCount.ToString("N0")</div>
+            <span class="text-secondary small">Total appointments this month</span>
         </div>
     </div>
 </div>
 
-<!-- Upcoming Appointments Table (UI Match: Admin overview.png) -->
-<div class="mc-card p-4 mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="h6 mb-0 fw-bold text-ink">Upcoming appointments</h2>
-            <span class="text-secondary small">Next scheduled clinical visits for today</span>
+<!-- Charts Section (UI Match: Admin overview.png) -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-lg-7">
+        <div class="mc-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="h6 mb-0 fw-bold text-ink">Appointment activity (last 7 days)</h2>
+                    <span class="text-secondary small">Confirmed consultations vs cancelled</span>
+                </div>
+                <span class="badge bg-light text-secondary">Rolling 7 days</span>
+            </div>
+            <div style="height: 240px; position: relative;">
+                <canvas id="activityChart"></canvas>
+            </div>
         </div>
-        <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-confirmed-text);">
-            Admin View
-        </span>
     </div>
 
-    <div class="table-responsive">
-        <table class="table mc-table align-middle">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Patient</th>
-                    <th>Attending Doctor</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="fw-semibold">10:30 AM</td>
-                    <td>
-                        <strong class="d-block text-ink">Ahmed Tarek</strong>
-                        <span class="text-secondary small">P-1042 · Follow-up</span>
-                    </td>
-                    <td>
-                        <span class="text-ink">Dr. Mariam Ahmed</span>
-                        <span class="text-secondary small d-block">Cardiology</span>
-                    </td>
-                    <td>
-                        <span class="badge" style="background-color: var(--mc-confirmed-bg); color: var(--mc-confirmed-text);">
-                            Confirmed
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="fw-semibold">10:45 AM</td>
-                    <td>
-                        <strong class="d-block text-ink">Menna Adel</strong>
-                        <span class="text-secondary small">P-1186 · Consultation</span>
-                    </td>
-                    <td>
-                        <span class="text-ink">Dr. Omar Hassan</span>
-                        <span class="text-secondary small d-block">Dermatology</span>
-                    </td>
-                    <td>
-                        <span class="badge" style="background-color: var(--mc-pending-bg); color: var(--mc-pending-text);">
-                            Pending
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="fw-semibold">11:00 AM</td>
-                    <td>
-                        <strong class="d-block text-ink">Youssef Hany</strong>
-                        <span class="text-secondary small">P-1204 · Follow-up</span>
-                    </td>
-                    <td>
-                        <span class="text-ink">Dr. Salma Mahmoud</span>
-                        <span class="text-secondary small d-block">Pediatrics</span>
-                    </td>
-                    <td>
-                        <span class="badge" style="background-color: var(--mc-confirmed-bg); color: var(--mc-confirmed-text);">
-                            Confirmed
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="col-12 col-lg-5">
+        <div class="mc-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="h6 mb-0 fw-bold text-ink">This week's schedule</h2>
+                    <span class="text-secondary small">Daily appointment volume</span>
+                </div>
+                <span class="badge bg-light text-secondary">Current week</span>
+            </div>
+            <div style="height: 240px; position: relative;">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Bottom Section: Appointments & Doctors on duty -->
+<div class="row g-3">
+    <!-- Today's Appointments (Col-8) -->
+    <div class="col-12 col-lg-8">
+        <div class="mc-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h2 class="h6 mb-0 fw-bold text-ink">Today's appointments</h2>
+                    <span class="text-secondary small">Real-time schedule for @DateTime.UtcNow.ToString("dddd, MMMM dd")</span>
+                </div>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" onclick="filterAppointments('all', this)">All</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="filterAppointments('confirmed', this)">Confirmed</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="filterAppointments('pending', this)">Pending</button>
+                </div>
+            </div>
+
+            @if (data.TodayAppointments.Count == 0)
+            {
+                <div class="p-4 text-center text-secondary">
+                    <i class="bi bi-calendar-check fs-2 text-muted d-block mb-2"></i>
+                    <p class="mb-0">No appointments scheduled for today.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table mc-table align-middle mb-0" id="todayApptsTable">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Patient</th>
+                                <th>Attending Doctor</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appt in data.TodayAppointments)
+                            {
+                                var statusClass = appt.Status switch
+                                {
+                                    MediCare.Data.Entities.AppointmentStatus.Confirmed => "confirmed",
+                                    MediCare.Data.Entities.AppointmentStatus.Pending => "pending",
+                                    MediCare.Data.Entities.AppointmentStatus.Completed => "completed",
+                                    MediCare.Data.Entities.AppointmentStatus.Cancelled => "cancelled",
+                                    _ => "rejected"
+                                };
+
+                                <tr data-status="@statusClass">
+                                    <td class="fw-semibold text-ink">
+                                        @appt.FormattedTime
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium text-ink">@appt.PatientName</div>
+                                        <span class="text-secondary small">@appt.PatientCode</span>
+                                    </td>
+                                    <td>
+                                        <div class="text-ink">@appt.DoctorName</div>
+                                        <span class="text-secondary small">@appt.SpecializationName</span>
+                                    </td>
+                                    <td>
+                                        <span class="mc-badge mc-badge--@statusClass">@appt.Status</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-controller="Admin" asp-action="Appointments" asp-route-date="@DateTime.UtcNow.ToString("yyyy-MM-dd")" class="btn btn-light btn-sm">
+                                            Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Doctor Availability List (Col-4) -->
+    <div class="col-12 col-lg-4">
+        <div class="mc-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h6 mb-0 fw-bold text-ink">Doctor availability</h2>
+                <a asp-controller="Admin" asp-action="Doctors" class="small text-primary text-decoration-none">View all</a>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+                @foreach (var doc in data.DoctorAvailabilities)
+                {
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background-color: var(--mc-canvas);">
+                        <div class="d-flex align-items-center gap-2">
+                            @if (!string.IsNullOrEmpty(doc.ProfileImage))
+                            {
+                                <img src="@doc.ProfileImage" class="rounded-circle" style="width: 38px; height: 38px; object-fit: cover;" alt="@doc.DoctorName" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 38px; height: 38px; background-color: var(--mc-primary-light);">
+                                    @doc.DoctorName.Substring(0, Math.Min(2, doc.DoctorName.Length))
+                                </div>
+                            }
+                            <div>
+                                <div class="fw-medium text-ink small">@doc.DoctorName</div>
+                                <div class="text-secondary" style="font-size: 11px;">@doc.Specialization</div>
+                            </div>
+                        </div>
+                        <div>
+                            @if (doc.IsAvailableToday)
+                            {
+                                <span class="badge" style="background-color: var(--mc-available-bg, #E8F5E9); color: var(--mc-available-text, #2E7D32); font-size: 11px;">
+                                    Available
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge" style="background-color: #F1F5F9; color: #64748B; font-size: 11px;">
+                                    Off duty
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/chartjs/chart.umd.min.js"></script>
+    <script>
+        // Activity Line Chart
+        const activityCtx = document.getElementById('activityChart').getContext('2d');
+        new Chart(activityCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.ActivityChartDays)),
+                datasets: [
+                    {
+                        label: 'Confirmed',
+                        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.ActivityChartConfirmed)),
+                        borderColor: '#0284C7',
+                        backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                        tension: 0.3,
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Cancelled',
+                        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.ActivityChartCancelled)),
+                        borderColor: '#DC2626',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        borderDash: [4, 4],
+                        borderWidth: 2,
+                        pointRadius: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { precision: 0 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Weekly Bar Chart
+        const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+        new Chart(weeklyCtx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.WeeklyBreakdownDays)),
+                datasets: [{
+                    label: 'Appointments',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.WeeklyBreakdownCounts)),
+                    backgroundColor: '#90D0F2',
+                    borderRadius: 4,
+                    hoverBackgroundColor: '#0284C7'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { precision: 0 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Filter Table Tabs
+        function filterAppointments(filter, btn) {
+            document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const rows = document.querySelectorAll('#todayApptsTable tbody tr');
+            rows.forEach(r => {
+                if (filter === 'all') {
+                    r.style.display = '';
+                } else {
+                    r.style.display = r.getAttribute('data-status') === filter ? '' : 'none';
+                }
+            });
+        }
+    </script>
+}

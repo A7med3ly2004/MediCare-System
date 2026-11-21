@@ -1,0 +1,90 @@
+@model MediCare.Web.ViewModels.Admin.AdminSpecializationsViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Specializations";
+}
+
+<div class="mc-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="mc-page-label">CLINIC TAXONOMY</span>
+            <h1 class="mc-page-title mb-1">Clinical Specializations</h1>
+            <p class="mc-page-subtitle">Medical specialties and doctor service categorization</p>
+        </div>
+        <div>
+            <a asp-controller="Admin" asp-action="Doctors" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-people me-1"></i> Doctor Directory
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Add New Specialization (Col-4) -->
+    <div class="col-12 col-md-4">
+        <div class="mc-card p-4">
+            <h2 class="h6 fw-bold text-ink mb-2">Add Specialization</h2>
+            <p class="text-secondary small mb-3">Define a new medical department or specialty.</p>
+
+            <form asp-controller="Admin" asp-action="CreateSpecialization" method="post">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label for="newSpecName" class="form-label small fw-semibold text-ink">Specialization Name <span class="text-danger">*</span></label>
+                    <input type="text" id="newSpecName" name="name" class="form-control" placeholder="e.g. Ophthalmology" required />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-plus-lg me-1"></i> Add Specialization
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Specializations List (Col-8) -->
+    <div class="col-12 col-md-8">
+        <div class="mc-card p-4">
+            <h2 class="h6 fw-bold text-ink mb-3">Existing Specializations (@Model.Specializations.Count)</h2>
+
+            <div class="table-responsive">
+                <table class="table mc-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Specialization</th>
+                            <th class="text-center">Active Doctors</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var spec in Model.Specializations)
+                        {
+                            <tr>
+                                <td>
+                                    <form asp-controller="Admin" asp-action="EditSpecialization" method="post" class="d-flex align-items-center gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@spec.Id" />
+                                        <input type="text" name="name" value="@spec.Name" class="form-control form-control-sm" style="max-width: 240px;" required />
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm" title="Save name">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @(spec.DoctorCount > 0 ? "bg-light text-primary border" : "bg-light text-muted border")">
+                                        @spec.DoctorCount @(spec.DoctorCount == 1 ? "doctor" : "doctors")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <form asp-controller="Admin" asp-action="DeleteSpecialization" asp-route-id="@spec.Id" method="post" class="d-inline" onsubmit="return confirm('Delete specialization @spec.Name? (Will fail if doctors are currently assigned)');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Specialization">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

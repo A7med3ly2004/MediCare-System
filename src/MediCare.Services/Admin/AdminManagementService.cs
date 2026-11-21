@@ -84,6 +84,7 @@ public class AdminManagementService : IAdminManagementService
             UserId = x.Doctor.UserId,
             FullName = x.Doctor.User.FullName,
             Email = x.Doctor.User.Email ?? string.Empty,
+            ProfileImage = x.Doctor.ProfileImage,
             SpecializationName = x.Doctor.Specialization?.Name ?? "General Practice",
             SpecializationId = x.Doctor.SpecializationId,
             Location = x.Doctor.Location,
@@ -91,6 +92,7 @@ public class AdminManagementService : IAdminManagementService
             ConsultationFee = x.Doctor.ConsultationFee,
             IsSuspended = x.Doctor.User.IsSuspended,
             IsDeleted = x.Doctor.IsDeleted,
+            IsEmailVerified = x.Doctor.User.IsEmailVerified,
             ActiveAppointmentsCount = x.ActiveCount,
             CreatedAt = x.Doctor.User.CreatedAt
         }).ToList();
@@ -129,6 +131,7 @@ public class AdminManagementService : IAdminManagementService
             UserId = d.UserId,
             FullName = d.User.FullName,
             Email = d.User.Email ?? string.Empty,
+            ProfileImage = d.ProfileImage,
             SpecializationName = d.Specialization?.Name ?? "General Practice",
             SpecializationId = d.SpecializationId,
             Location = d.Location,
@@ -136,6 +139,7 @@ public class AdminManagementService : IAdminManagementService
             ConsultationFee = d.ConsultationFee,
             IsSuspended = d.User.IsSuspended,
             IsDeleted = d.IsDeleted,
+            IsEmailVerified = d.User.IsEmailVerified,
             ActiveAppointmentsCount = activeCount,
             CreatedAt = d.User.CreatedAt
         };
@@ -317,6 +321,8 @@ public class AdminManagementService : IAdminManagementService
             PhoneNumber = p.PhoneNumber,
             DateOfBirth = p.DateOfBirth,
             BloodGroup = p.BloodGroup,
+            Allergies = p.Allergies,
+            MedicalHistory = p.MedicalHistory,
             IsSuspended = p.User.IsSuspended,
             IsDeleted = p.IsDeleted,
             ActiveAppointmentsCount = activeCount,
