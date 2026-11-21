@@ -76,7 +76,7 @@
         </div>
         <div class="col-12 col-sm-6 col-md-2 d-flex align-items-end gap-2 pt-md-4">
             <button type="submit" class="btn btn-primary btn-sm flex-fill">Apply</button>
-            <a asp-controller="Admin" asp-action="Appointments" class="btn btn-light btn-sm border">Clear</a>
+            <a asp-controller="Admin" asp-action="Appointments" class="btn btn-sm" style="background: var(--mc-canvas); color: var(--mc-ink); border: 1px solid var(--mc-hairline);">Clear</a>
         </div>
     </form>
 </div>
@@ -124,7 +124,7 @@
                             </td>
                             <td>
                                 <div class="fw-semibold text-ink">@appt.PatientName</div>
-                                <span class="badge bg-light text-secondary border font-monospace" style="font-size: 11px;">@appt.PatientCode</span>
+                                <span class="badge font-monospace" style="background: var(--mc-canvas); color: var(--mc-secondary-text); border: 1px solid var(--mc-hairline); font-size: 11px;">@appt.PatientCode</span>
                                 @if (!string.IsNullOrEmpty(appt.PatientPhone))
                                 {
                                     <span class="text-muted small d-block">@appt.PatientPhone</span>
@@ -193,7 +193,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="button" class="btn btn-sm" style="background: var(--mc-canvas); color: var(--mc-ink); border: 1px solid var(--mc-hairline);" data-bs-dismiss="modal">Cancel</button>
                                                     <button type="submit" class="btn btn-danger btn-sm">Reject Appointment</button>
                                                 </div>
                                             </form>
@@ -220,7 +220,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Keep</button>
+                                                    <button type="button" class="btn btn-sm" style="background: var(--mc-canvas); color: var(--mc-ink); border: 1px solid var(--mc-hairline);" data-bs-dismiss="modal">Keep</button>
                                                     <button type="submit" class="btn btn-danger btn-sm">Cancel Appointment</button>
                                                 </div>
                                             </form>

@@ -40,7 +40,7 @@
         </div>
         <div class="col-12 col-md-3 d-flex gap-2">
             <button type="submit" class="btn btn-primary btn-sm flex-fill">Filter Logs</button>
-            <a asp-controller="Admin" asp-action="Notifications" class="btn btn-light btn-sm border">Reset</a>
+            <a asp-controller="Admin" asp-action="Notifications" class="btn btn-sm" style="background: var(--mc-canvas); color: var(--mc-ink); border: 1px solid var(--mc-hairline);">Reset</a>
         </div>
     </form>
 </div>
@@ -81,7 +81,7 @@
                                 <span class="text-secondary small">@n.RecipientEmail</span>
                             </td>
                             <td>
-                                <span class="badge bg-light text-ink border" style="font-size: 11px;">@n.Type</span>
+                                <span class="badge border" style="background: var(--mc-canvas); color: var(--mc-ink); border-color: var(--mc-hairline) !important; font-size: 11px;">@n.Type</span>
                             </td>
                             <td>
                                 <span class="text-ink small">@n.Subject</span>
@@ -89,7 +89,7 @@
                             <td>
                                 @if (n.Status == "Sent")
                                 {
-                                    <span class="badge" style="background-color: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0;">
+                                    <span class="badge" style="background-color: var(--mc-completed-bg); color: var(--mc-completed-text); border: 1px solid var(--mc-hairline);">
                                         <i class="bi bi-check2-all me-1"></i> Sent
                                     </span>
                                     @if (n.SentAt.HasValue)
@@ -99,13 +99,13 @@
                                 }
                                 else if (n.Status == "Failed")
                                 {
-                                    <span class="badge" style="background-color: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5;">
+                                    <span class="badge" style="background-color: var(--mc-cancelled-bg); color: var(--mc-cancelled-text); border: 1px solid var(--mc-hairline);">
                                         <i class="bi bi-exclamation-octagon me-1"></i> Failed
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge" style="background-color: #FFFBEB; color: #D97706; border: 1px solid #FDE68A;">
+                                    <span class="badge" style="background-color: var(--mc-pending-bg); color: var(--mc-pending-text); border: 1px solid var(--mc-hairline);">
                                         Pending
                                     </span>
                                 }

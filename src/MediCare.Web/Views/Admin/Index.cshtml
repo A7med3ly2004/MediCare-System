@@ -29,7 +29,7 @@
         <div class="mc-card p-4 h-100">
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="text-secondary small fw-medium">Total registered patients</span>
-                <span class="badge bg-light text-primary"><i class="bi bi-people"></i></span>
+                <span class="badge" style="background: var(--mc-canvas); color: var(--mc-confirmed-text); border: 1px solid var(--mc-hairline);"><i class="bi bi-people"></i></span>
             </div>
             <div class="display-6 fw-bold text-ink mb-1">@data.TotalPatients.ToString("N0")</div>
             <span class="text-success small fw-medium">
@@ -42,7 +42,7 @@
         <div class="mc-card p-4 h-100">
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="text-secondary small fw-medium">Today's appointments</span>
-                <span class="badge bg-light text-primary"><i class="bi bi-calendar-event"></i></span>
+                <span class="badge" style="background: var(--mc-canvas); color: var(--mc-confirmed-text); border: 1px solid var(--mc-hairline);"><i class="bi bi-calendar-event"></i></span>
             </div>
             <div class="display-6 fw-bold text-ink mb-1">@data.TodayAppointmentsCount</div>
             <span class="text-secondary small">
@@ -55,7 +55,7 @@
         <div class="mc-card p-4 h-100">
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="text-secondary small fw-medium">Doctors on duty</span>
-                <span class="badge bg-light text-primary"><i class="bi bi-person-badge"></i></span>
+                <span class="badge" style="background: var(--mc-canvas); color: var(--mc-confirmed-text); border: 1px solid var(--mc-hairline);"><i class="bi bi-person-badge"></i></span>
             </div>
             <div class="display-6 fw-bold text-ink mb-1">@data.AvailableDoctorsToday <span class="fs-6 text-secondary fw-normal">/ @data.TotalDoctors</span></div>
             <span class="text-secondary small">Active practitioners today</span>
@@ -66,7 +66,7 @@
         <div class="mc-card p-4 h-100">
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="text-secondary small fw-medium">Monthly volume</span>
-                <span class="badge bg-light text-primary"><i class="bi bi-graph-up"></i></span>
+                <span class="badge" style="background: var(--mc-canvas); color: var(--mc-confirmed-text); border: 1px solid var(--mc-hairline);"><i class="bi bi-graph-up"></i></span>
             </div>
             <div class="display-6 fw-bold text-ink mb-1">@data.MonthlyAppointmentsCount.ToString("N0")</div>
             <span class="text-secondary small">Total appointments this month</span>
@@ -83,7 +83,7 @@
                     <h2 class="h6 mb-0 fw-bold text-ink">Appointment activity (last 7 days)</h2>
                     <span class="text-secondary small">Confirmed consultations vs cancelled</span>
                 </div>
-                <span class="badge bg-light text-secondary">Rolling 7 days</span>
+                <span class="badge" style="background: var(--mc-canvas); color: var(--mc-secondary-text); border: 1px solid var(--mc-hairline);">Rolling 7 days</span>
             </div>
             <div style="height: 240px; position: relative;">
                 <canvas id="activityChart"></canvas>
@@ -98,7 +98,7 @@
                     <h2 class="h6 mb-0 fw-bold text-ink">This week's schedule</h2>
                     <span class="text-secondary small">Daily appointment volume</span>
                 </div>
-                <span class="badge bg-light text-secondary">Current week</span>
+                <span class="badge" style="background: var(--mc-canvas); color: var(--mc-secondary-text); border: 1px solid var(--mc-hairline);">Current week</span>
             </div>
             <div style="height: 240px; position: relative;">
                 <canvas id="weeklyChart"></canvas>
@@ -172,7 +172,7 @@
                                         <span class="mc-badge mc-badge--@statusClass">@appt.Status</span>
                                     </td>
                                     <td class="text-end">
-                                        <a asp-controller="Admin" asp-action="Appointments" asp-route-date="@DateTime.UtcNow.ToString("yyyy-MM-dd")" class="btn btn-light btn-sm">
+                                        <a asp-controller="Admin" asp-action="Appointments" asp-route-date="@DateTime.UtcNow.ToString("yyyy-MM-dd")" class="btn btn-sm" style="background: var(--mc-canvas); color: var(--mc-ink); border: 1px solid var(--mc-hairline);">
                                             Details
                                         </a>
                                     </td>
@@ -222,7 +222,7 @@
                             }
                             else
                             {
-                                <span class="badge" style="background-color: #F1F5F9; color: #64748B; font-size: 11px;">
+                                <span class="badge" style="background: var(--mc-canvas); color: var(--mc-secondary-text); border: 1px solid var(--mc-hairline); font-size: 11px;">
                                     Off duty
                                 </span>
                             }
@@ -237,9 +237,24 @@
 @section Scripts {
     <script src="~/lib/chartjs/chart.umd.min.js"></script>
     <script>
+        function getChartColors() {
+            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            return {
+                text: isDark ? '#94A3B8' : '#607280',
+                grid: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
+                lineConfirmed: isDark ? '#38BDF8' : '#0284C7',
+                lineConfirmedBg: isDark ? 'rgba(56, 189, 248, 0.12)' : 'rgba(2, 132, 199, 0.08)',
+                lineCancelled: isDark ? '#F87171' : '#DC2626',
+                barAppts: isDark ? '#38BDF8' : '#90D0F2',
+                barApptsHover: isDark ? '#0284C7' : '#0284C7'
+            };
+        }
+
+        const colors = getChartColors();
+
         // Activity Line Chart
         const activityCtx = document.getElementById('activityChart').getContext('2d');
-        new Chart(activityCtx, {
+        const activityChart = new Chart(activityCtx, {
             type: 'line',
             data: {
                 labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.ActivityChartDays)),
@@ -247,8 +262,8 @@
                     {
                         label: 'Confirmed',
                         data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.ActivityChartConfirmed)),
-                        borderColor: '#0284C7',
-                        backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                        borderColor: colors.lineConfirmed,
+                        backgroundColor: colors.lineConfirmedBg,
                         tension: 0.3,
                         fill: true,
                         borderWidth: 2,
@@ -257,7 +272,7 @@
                     {
                         label: 'Cancelled',
                         data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.ActivityChartCancelled)),
-                        borderColor: '#DC2626',
+                        borderColor: colors.lineCancelled,
                         backgroundColor: 'transparent',
                         tension: 0.3,
                         borderDash: [4, 4],
@@ -270,27 +285,41 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            font: { size: 11 },
+                            color: colors.text
+                        }
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { precision: 0 } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.grid },
+                        ticks: { precision: 0, color: colors.text }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: colors.text }
+                    }
                 }
             }
         });
 
         // Weekly Bar Chart
         const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
-        new Chart(weeklyCtx, {
+        const weeklyChart = new Chart(weeklyCtx, {
             type: 'bar',
             data: {
                 labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.WeeklyBreakdownDays)),
                 datasets: [{
                     label: 'Appointments',
                     data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.WeeklyBreakdownCounts)),
-                    backgroundColor: '#90D0F2',
+                    backgroundColor: colors.barAppts,
                     borderRadius: 4,
-                    hoverBackgroundColor: '#0284C7'
+                    hoverBackgroundColor: colors.barApptsHover
                 }]
             },
             options: {
@@ -300,9 +329,38 @@
                     legend: { display: false }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { precision: 0 } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.grid },
+                        ticks: { precision: 0, color: colors.text }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: colors.text }
+                    }
                 }
+            }
+        });
+
+        // Dynamically update charts on theme change
+        document.addEventListener('themeChanged', function () {
+            const updated = getChartColors();
+            if (activityChart) {
+                activityChart.options.scales.y.grid.color = updated.grid;
+                activityChart.options.scales.y.ticks.color = updated.text;
+                activityChart.options.scales.x.ticks.color = updated.text;
+                activityChart.options.plugins.legend.labels.color = updated.text;
+                activityChart.data.datasets[0].borderColor = updated.lineConfirmed;
+                activityChart.data.datasets[0].backgroundColor = updated.lineConfirmedBg;
+                activityChart.data.datasets[1].borderColor = updated.lineCancelled;
+                activityChart.update();
+            }
+            if (weeklyChart) {
+                weeklyChart.options.scales.y.grid.color = updated.grid;
+                weeklyChart.options.scales.y.ticks.color = updated.text;
+                weeklyChart.options.scales.x.ticks.color = updated.text;
+                weeklyChart.data.datasets[0].backgroundColor = updated.barAppts;
+                weeklyChart.update();
             }
         });
 

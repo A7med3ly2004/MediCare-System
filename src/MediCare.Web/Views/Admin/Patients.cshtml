@@ -45,7 +45,7 @@
     <form method="get" asp-controller="Admin" asp-action="Patients" class="row g-2 align-items-center">
         <div class="col-12 col-md-6">
             <div class="input-group input-group-sm">
-                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <span class="input-group-text" style="background: var(--mc-canvas); border-color: var(--mc-hairline); color: var(--mc-secondary-text);"><i class="bi bi-search"></i></span>
                 <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search by patient name, code (P-1001), phone, or email..." />
             </div>
         </div>
@@ -58,7 +58,7 @@
         </div>
         <div class="col-12 col-md-2 d-flex gap-2">
             <button type="submit" class="btn btn-primary btn-sm flex-fill">Filter</button>
-            <a asp-controller="Admin" asp-action="Patients" class="btn btn-light btn-sm border">Reset</a>
+            <a asp-controller="Admin" asp-action="Patients" class="btn btn-sm" style="background: var(--mc-canvas); color: var(--mc-ink); border: 1px solid var(--mc-hairline);">Reset</a>
         </div>
     </form>
 </div>
@@ -93,7 +93,7 @@
                     {
                         <tr>
                             <td>
-                                <span class="badge bg-light text-ink border font-monospace">@pat.PatientCode</span>
+                                <span class="badge font-monospace" style="background: var(--mc-canvas); color: var(--mc-ink); border: 1px solid var(--mc-hairline);">@pat.PatientCode</span>
                             </td>
                             <td>
                                 <div class="fw-semibold text-ink">@pat.FullName</div>
@@ -105,7 +105,7 @@
                             <td>
                                 @if (!string.IsNullOrEmpty(pat.BloodGroup))
                                 {
-                                    <span class="badge bg-light text-danger border">@pat.BloodGroup</span>
+                                    <span class="badge" style="background: var(--mc-canvas); color: #DC2626; border: 1px solid var(--mc-hairline);">@pat.BloodGroup</span>
                                 }
                                 else
                                 {

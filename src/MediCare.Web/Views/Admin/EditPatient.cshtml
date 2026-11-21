@@ -35,7 +35,7 @@
 
                 <div class="mb-3">
                     <label class="form-label small fw-semibold text-ink">Email Address</label>
-                    <input value="@Model.Email" class="form-control bg-light" disabled />
+                    <input value="@Model.Email" class="form-control" style="background: var(--mc-canvas); border-color: var(--mc-hairline); color: var(--mc-secondary-text);" disabled />
                     <span class="form-text text-muted small">Email accounts are managed via Identity authentication.</span>
                 </div>
 
@@ -75,7 +75,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a asp-controller="Admin" asp-action="Patients" class="btn btn-light border">Cancel</a>
+                    <a asp-controller="Admin" asp-action="Patients" class="btn" style="background: var(--mc-canvas); color: var(--mc-ink); border: 1px solid var(--mc-hairline);">Cancel</a>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>

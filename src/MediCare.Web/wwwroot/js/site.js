@@ -73,6 +73,7 @@ function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('medicare-theme', theme);
     updateThemeIcons();
+    document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: theme } }));
 }
 
 function updateThemeIcons() {

@@ -2288,3 +2288,151 @@ input, button, select, textarea {
   border-color: var(--mc-primary);
 }
 
+/* ─────────────────────────────────────────────
+   GLOBAL CONTRAST & DARK MODE COMPATIBILITY
+   ───────────────────────────────────────────── */
+.text-ink {
+  color: var(--mc-ink) !important;
+}
+
+.text-secondary {
+  color: var(--mc-secondary-text) !important;
+}
+
+.text-muted {
+  color: var(--mc-secondary-text) !important;
+}
+
+[data-bs-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-white {
+  background-color: var(--mc-surface) !important;
+  color: var(--mc-ink) !important;
+}
+
+[data-bs-theme="dark"] .bg-light,
+[data-theme="dark"] .bg-light {
+  background-color: var(--mc-canvas) !important;
+  color: var(--mc-ink) !important;
+}
+
+[data-bs-theme="dark"] .text-dark,
+[data-theme="dark"] .text-dark {
+  color: var(--mc-ink) !important;
+}
+
+[data-bs-theme="dark"] .btn-light,
+[data-theme="dark"] .btn-light {
+  background-color: var(--mc-surface) !important;
+  border-color: var(--mc-hairline) !important;
+  color: var(--mc-ink) !important;
+}
+
+[data-bs-theme="dark"] .btn-light:hover,
+[data-theme="dark"] .btn-light:hover {
+  background-color: var(--mc-canvas) !important;
+  border-color: var(--mc-hairline) !important;
+  color: var(--mc-ink) !important;
+}
+
+[data-bs-theme="dark"] .input-group-text,
+[data-theme="dark"] .input-group-text {
+  background-color: var(--mc-surface) !important;
+  border-color: var(--mc-hairline) !important;
+  color: var(--mc-secondary-text) !important;
+}
+
+[data-bs-theme="dark"] .badge.bg-light,
+[data-theme="dark"] .badge.bg-light {
+  background-color: var(--mc-canvas) !important;
+  border: 1px solid var(--mc-hairline) !important;
+  color: var(--mc-secondary-text) !important;
+}
+
+[data-bs-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-content {
+  background-color: var(--mc-surface) !important;
+  border-color: var(--mc-hairline) !important;
+  color: var(--mc-ink) !important;
+}
+
+[data-bs-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-footer,
+[data-theme="dark"] .modal-footer {
+  border-color: var(--mc-hairline) !important;
+}
+
+[data-bs-theme="dark"] .btn-close,
+[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+[data-bs-theme="dark"] .border,
+[data-theme="dark"] .border {
+  border-color: var(--mc-hairline) !important;
+}
+
+[data-bs-theme="dark"] .mc-page-footer,
+[data-theme="dark"] .mc-page-footer,
+[data-bs-theme="dark"] .mc-public-footer,
+[data-theme="dark"] .mc-public-footer {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: var(--mc-secondary-text);
+}
+
+[data-bs-theme="dark"] .mc-support-box,
+[data-theme="dark"] .mc-support-box {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+}
+
+[data-bs-theme="dark"] .mc-user-chip,
+[data-theme="dark"] .mc-user-chip {
+  background-color: transparent;
+  border-color: #334155;
+}
+
+[data-bs-theme="dark"] .mc-user-chip:hover,
+[data-theme="dark"] .mc-user-chip:hover {
+  background-color: #0f172a;
+}
+
+[data-bs-theme="dark"] .mc-user-name,
+[data-theme="dark"] .mc-user-name {
+  color: var(--mc-ink);
+}
+
+[data-bs-theme="dark"] .mc-nav-item,
+[data-theme="dark"] .mc-nav-item {
+  color: var(--mc-secondary-text);
+}
+
+[data-bs-theme="dark"] .mc-nav-item:hover,
+[data-theme="dark"] .mc-nav-item:hover {
+  background-color: #1e293b;
+  color: var(--mc-ink);
+}
+
+[data-bs-theme="dark"] .mc-nav-item.active,
+[data-theme="dark"] .mc-nav-item.active {
+  background-color: #1e3a5f;
+  color: var(--mc-primary);
+  border-left-color: var(--mc-primary);
+}
+
+[data-bs-theme="dark"] [style*="background-color: #F8FBFE"],
+[data-theme="dark"] [style*="background-color: #F8FBFE"] {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] [style*="background-color: #FFF3E0"],
+[data-theme="dark"] [style*="background-color: #FFF3E0"],
+[data-bs-theme="dark"] [style*="background-color: #FFFBEB"],
+[data-theme="dark"] [style*="background-color: #FFFBEB"] {
+  background-color: #3b2a1a !important;
+  border-color: #78350f !important;
+  color: #fde68a !important;
+}
+

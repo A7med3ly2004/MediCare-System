@@ -19,8 +19,8 @@
         <div class="d-flex align-items-center flex-wrap gap-2">
             <!-- Date Filter for Daily Report -->
             <form method="get" asp-controller="Admin" asp-action="Reports" class="d-flex align-items-center gap-2">
-                <input type="date" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" class="form-control form-control-sm" style="max-width: 160px;" />
-                <button type="submit" class="btn btn-light btn-sm border">
+                <input type="date" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" class="form-control form-control-sm" style="max-width: 160px; background: var(--mc-surface); border-color: var(--mc-hairline); color: var(--mc-ink);" />
+                <button type="submit" class="btn btn-sm" style="background: var(--mc-surface); border: 1px solid var(--mc-hairline); color: var(--mc-ink);">
                     <i class="bi bi-funnel me-1"></i> Apply
                 </button>
             </form>
@@ -39,7 +39,7 @@
             <form asp-controller="Admin" asp-action="SeedVolume" method="post" class="d-inline" onsubmit="return confirm('Generate 10,000 sample appointments for performance evaluation?');">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="count" value="10000" />
-                <button type="submit" class="btn btn-outline-secondary btn-sm" title="Seed 10,000 appointments to test NFR-02 response time">
+                <button type="submit" class="btn btn-sm" style="background: var(--mc-surface); border: 1px solid var(--mc-hairline); color: var(--mc-secondary-text);" title="Seed 10,000 appointments to test NFR-02 response time">
                     <i class="bi bi-lightning-charge me-1"></i> Seed 10k (NFR-02)
                 </button>
             </form>
@@ -48,36 +48,36 @@
 </div>
 
 <!-- Daily Report Summary Banner (UI Match: Reports and analytics.png) -->
-<div class="mc-card p-4 mb-4" style="background: linear-gradient(135deg, #FFFFFF 0%, #F0F9FF 100%);">
+<div class="mc-card p-4 mb-4" style="background: linear-gradient(135deg, var(--mc-surface) 0%, var(--mc-primary-light) 100%); border: 1px solid var(--mc-hairline);">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <div>
             <h2 class="h6 mb-0 fw-bold text-ink">Daily Summary — @Model.SelectedDate.ToString("dddd, MMMM dd, yyyy")</h2>
             <span class="text-secondary small">Comprehensive audit of daily operational metrics</span>
         </div>
-        <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-confirmed-text);">
+        <span class="badge" style="background-color: var(--mc-primary-light); color: var(--mc-confirmed-text); border: 1px solid var(--mc-hairline);">
             Daily Audit Active
         </span>
     </div>
 
     <div class="row g-3">
         <div class="col-6 col-md-3">
-            <div class="p-3 bg-white rounded border">
+            <div class="p-3 rounded" style="background: var(--mc-surface); border: 1px solid var(--mc-hairline);">
                 <span class="text-secondary small d-block mb-1">New Patients</span>
                 <div class="h4 fw-bold text-ink mb-0">@report.NewPatientRegistrations</div>
-                <span class="text-muted" style="font-size: 11px;">@report.NewDoctorRegistrations staff joined</span>
+                <span class="text-secondary" style="font-size: 11px;">@report.NewDoctorRegistrations staff joined</span>
             </div>
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="p-3 bg-white rounded border">
+            <div class="p-3 rounded" style="background: var(--mc-surface); border: 1px solid var(--mc-hairline);">
                 <span class="text-secondary small d-block mb-1">Appointments Booked</span>
                 <div class="h4 fw-bold text-ink mb-0">@report.AppointmentsBooked</div>
-                <span class="text-muted" style="font-size: 11px;">@report.AppointmentsConfirmed confirmed</span>
+                <span class="text-secondary" style="font-size: 11px;">@report.AppointmentsConfirmed confirmed</span>
             </div>
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="p-3 bg-white rounded border">
+            <div class="p-3 rounded" style="background: var(--mc-surface); border: 1px solid var(--mc-hairline);">
                 <span class="text-secondary small d-block mb-1">Completed Consultations</span>
                 <div class="h4 fw-bold text-ink mb-0">@report.CompletedConsultations</div>
                 <span class="text-success" style="font-size: 11px;">@completionRate% fulfillment rate</span>
@@ -85,10 +85,10 @@
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="p-3 bg-white rounded border">
+            <div class="p-3 rounded" style="background: var(--mc-surface); border: 1px solid var(--mc-hairline);">
                 <span class="text-secondary small d-block mb-1">Estimated Revenue</span>
                 <div class="h4 fw-bold text-ink mb-0">@report.EstimatedRevenue.ToString("N0") <span class="fs-6 fw-normal text-secondary">EGP</span></div>
-                <span class="text-muted" style="font-size: 11px;">@report.AppointmentsCancelled cancelled</span>
+                <span class="text-secondary" style="font-size: 11px;">@report.AppointmentsCancelled cancelled</span>
             </div>
         </div>
     </div>
@@ -103,7 +103,7 @@
                     <h2 class="h6 mb-0 fw-bold text-ink">Appointment Trends (Last 12 Months)</h2>
                     <span class="text-secondary small">Comparison of booked vs completed consultations</span>
                 </div>
-                <span class="badge bg-light text-secondary">Grouped DB aggregation</span>
+                <span class="badge" style="background: var(--mc-canvas); color: var(--mc-secondary-text); border: 1px solid var(--mc-hairline);">Grouped DB aggregation</span>
             </div>
             <div style="height: 260px; position: relative;">
                 <canvas id="monthlyTrendChart"></canvas>
@@ -118,7 +118,7 @@
                     <h2 class="h6 mb-0 fw-bold text-ink">Patient Growth</h2>
                     <span class="text-secondary small">New accounts per month</span>
                 </div>
-                <span class="badge bg-light text-secondary">Last 6 months</span>
+                <span class="badge" style="background: var(--mc-canvas); color: var(--mc-secondary-text); border: 1px solid var(--mc-hairline);">Last 6 months</span>
             </div>
             <div style="height: 260px; position: relative;">
                 <canvas id="patientGrowthChart"></canvas>
@@ -173,7 +173,7 @@
                                         @doc.TotalAssigned
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-light text-success fw-bold">@doc.CompletedVisits</span>
+                                        <span class="badge fw-bold" style="background: var(--mc-canvas); color: #16A34A; border: 1px solid var(--mc-hairline);">@doc.CompletedVisits</span>
                                         <span class="text-secondary small d-block" style="font-size: 10px;">@doc.CompletionRate%</span>
                                     </td>
                                     <td class="text-end fw-semibold text-ink">
@@ -232,6 +232,21 @@
 @section Scripts {
     <script src="~/lib/chartjs/chart.umd.min.js"></script>
     <script>
+        function getChartColors() {
+            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            return {
+                text: isDark ? '#94A3B8' : '#607280',
+                grid: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
+                barBooked: isDark ? '#38BDF8' : '#90D0F2',
+                barCompleted: isDark ? '#4ADE80' : '#16A34A',
+                barCancelled: isDark ? '#F87171' : '#DC2626',
+                lineBorder: isDark ? '#38BDF8' : '#0284C7',
+                lineBg: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(2, 132, 199, 0.1)'
+            };
+        }
+
+        const colors = getChartColors();
+
         // 12-Month Trends Chart
         const trendLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.MonthlyTrends.Select(t => t.Month)));
         const bookedData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.MonthlyTrends.Select(t => t.TotalBooked)));
@@ -239,7 +254,7 @@
         const cancelledData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.MonthlyTrends.Select(t => t.Cancelled)));
 
         const trendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
-        new Chart(trendCtx, {
+        const trendChart = new Chart(trendCtx, {
             type: 'bar',
             data: {
                 labels: trendLabels,
@@ -247,19 +262,19 @@
                     {
                         label: 'Booked',
                         data: bookedData,
-                        backgroundColor: '#90D0F2',
+                        backgroundColor: colors.barBooked,
                         borderRadius: 3
                     },
                     {
                         label: 'Completed',
                         data: completedData,
-                        backgroundColor: '#16A34A',
+                        backgroundColor: colors.barCompleted,
                         borderRadius: 3
                     },
                     {
                         label: 'Cancelled',
                         data: cancelledData,
-                        backgroundColor: '#DC2626',
+                        backgroundColor: colors.barCancelled,
                         borderRadius: 3
                     }
                 ]
@@ -268,11 +283,25 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            font: { size: 11 },
+                            color: colors.text
+                        }
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { precision: 0 } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.grid },
+                        ticks: { precision: 0, color: colors.text }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: colors.text }
+                    }
                 }
             }
         });
@@ -282,15 +311,15 @@
         const growthData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(analytics.PatientGrowth.Select(g => g.NewPatients)));
 
         const growthCtx = document.getElementById('patientGrowthChart').getContext('2d');
-        new Chart(growthCtx, {
+        const growthChart = new Chart(growthCtx, {
             type: 'line',
             data: {
                 labels: growthLabels,
                 datasets: [{
                     label: 'New Patients',
                     data: growthData,
-                    borderColor: '#0284C7',
-                    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                    borderColor: colors.lineBorder,
+                    backgroundColor: colors.lineBg,
                     tension: 0.3,
                     fill: true,
                     borderWidth: 2,
@@ -304,9 +333,39 @@
                     legend: { display: false }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { precision: 0 } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.grid },
+                        ticks: { precision: 0, color: colors.text }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: colors.text }
+                    }
                 }
+            }
+        });
+
+        // Dynamically update charts on Dark/Light theme toggle
+        document.addEventListener('themeChanged', function () {
+            const updated = getChartColors();
+            if (trendChart) {
+                trendChart.options.scales.y.grid.color = updated.grid;
+                trendChart.options.scales.y.ticks.color = updated.text;
+                trendChart.options.scales.x.ticks.color = updated.text;
+                trendChart.options.plugins.legend.labels.color = updated.text;
+                trendChart.data.datasets[0].backgroundColor = updated.barBooked;
+                trendChart.data.datasets[1].backgroundColor = updated.barCompleted;
+                trendChart.data.datasets[2].backgroundColor = updated.barCancelled;
+                trendChart.update();
+            }
+            if (growthChart) {
+                growthChart.options.scales.y.grid.color = updated.grid;
+                growthChart.options.scales.y.ticks.color = updated.text;
+                growthChart.options.scales.x.ticks.color = updated.text;
+                growthChart.data.datasets[0].borderColor = updated.lineBorder;
+                growthChart.data.datasets[0].backgroundColor = updated.lineBg;
+                growthChart.update();
             }
         });
     </script>

@@ -68,7 +68,7 @@
                                     </form>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge @(spec.DoctorCount > 0 ? "bg-light text-primary border" : "bg-light text-muted border")">
+                                    <span class="badge border" style="background: var(--mc-canvas); color: @(spec.DoctorCount > 0 ? "var(--mc-confirmed-text)" : "var(--mc-secondary-text)"); border-color: var(--mc-hairline) !important;">
                                         @spec.DoctorCount @(spec.DoctorCount == 1 ? "doctor" : "doctors")
                                     </span>
                                 </td>

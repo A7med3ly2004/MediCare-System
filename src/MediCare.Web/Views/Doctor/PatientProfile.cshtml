@@ -179,7 +179,7 @@
                                             <strong class="text-ink">@rec.Diagnosis</strong>
                                             @if (rec.UpdatedAt.HasValue)
                                             {
-                                                <span class="badge bg-light text-secondary border" title="Edited on @rec.UpdatedAt.Value.ToString("g")">Edited</span>
+                                                <span class="badge border" style="background: var(--mc-canvas); color: var(--mc-secondary-text); border-color: var(--mc-hairline) !important;" title="Edited on @rec.UpdatedAt.Value.ToString("g")">Edited</span>
                                             }
                                         </div>
                                         <span class="text-secondary small">
