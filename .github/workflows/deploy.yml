@@ -1,0 +1,59 @@
+name: Continuous Deployment (CD)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  build-test-and-deploy:
+    name: Build, Test, Package & Deploy
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 LTS SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore NuGet Dependencies
+        run: dotnet restore MediCare.slnx
+
+      - name: Build Solution (Release)
+        run: dotnet build MediCare.slnx -c Release --no-restore
+
+      - name: Run Full Test Suite (Unit & Integration)
+        run: dotnet test MediCare.slnx -c Release --no-build --verbosity normal
+
+      - name: Install EF Core CLI Tool
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Generate Idempotent Database Migration Script
+        run: |
+          mkdir -p ./publish/migrations
+          dotnet ef migrations script --idempotent --project src/MediCare.Data --startup-project src/MediCare.Web --output ./publish/migrations/migrations.sql
+
+      - name: Upload Migration Script Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-database-migrations
+          path: ./publish/migrations/migrations.sql
+          retention-days: 30
+
+      - name: Publish Web Application
+        run: dotnet publish src/MediCare.Web/MediCare.Web.csproj -c Release -o ./publish/webapp --no-build
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish/webapp

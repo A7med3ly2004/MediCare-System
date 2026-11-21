@@ -53,6 +53,27 @@ public class DatabaseSeeder
         }
     }
 
+    /// <summary>
+    /// Production seeder. Run in Production/Staging environments.
+    /// Creates only roles and the initial Administrator account from App Settings (Admin:Email and Admin:Password).
+    /// Creates no sample doctors, patients, or appointments.
+    /// </summary>
+    public async Task SeedProductionAsync()
+    {
+        try
+        {
+            await SeedRolesAsync();
+            await SeedAdminAsync();
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Production roles and admin initialization completed.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred during production seeding.");
+            throw;
+        }
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Roles
     // ─────────────────────────────────────────────────────────────────────────
@@ -76,10 +97,14 @@ public class DatabaseSeeder
 
     private async Task SeedAdminAsync()
     {
-        var email = _configuration["Admin:Email"]
-            ?? throw new InvalidOperationException("Admin:Email must be set in user-secrets or environment variables.");
-        var password = _configuration["Admin:Password"]
-            ?? throw new InvalidOperationException("Admin:Password must be set in user-secrets or environment variables.");
+        var email = _configuration["Admin:Email"];
+        var password = _configuration["Admin:Password"];
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            _logger.LogWarning("Admin:Email or Admin:Password is not configured. Admin account creation skipped.");
+            return;
+        }
 
         var existing = await _userManager.FindByEmailAsync(email);
         if (existing is not null) return;

@@ -1,0 +1,42 @@
+name: Continuous Integration (CI)
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: windows-latest # Windows runner includes SQL Server LocalDB for integration tests
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 LTS SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore Dependencies
+        run: dotnet restore MediCare.slnx
+
+      - name: Build Solution (Release)
+        run: dotnet build MediCare.slnx -c Release --no-restore
+
+      - name: Run Unit and Integration Tests
+        run: dotnet test MediCare.slnx -c Release --no-build --verbosity normal --logger "console;verbosity=detailed"

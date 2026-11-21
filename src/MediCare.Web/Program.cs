@@ -47,11 +47,15 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+// Configure Cookie Security based on environment (HTTPS only in Production per NFR-05)
+var isProduction = builder.Environment.IsProduction();
+var cookieSecurePolicy = isProduction ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
+
 // Cookie configuration for Identity
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SecurePolicy = cookieSecurePolicy;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
@@ -63,9 +67,17 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Antiforgery cookie configuration
 builder.Services.AddAntiforgery(options =>
 {
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SecurePolicy = cookieSecurePolicy;
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+// Configure HSTS for production
+builder.Services.AddHsts(options =>
+{
+    options.Preload = true;
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(365);
 });
 
 // ─── App Pipeline ───────────────────────────────────────────────────────────
@@ -96,7 +108,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// ─── Development: apply migrations and seed ─────────────────────────────────
+// ─── Database Migrations and Seeding ────────────────────────────────────────
 
 if (app.Environment.IsDevelopment())
 {
@@ -105,17 +117,53 @@ if (app.Environment.IsDevelopment())
 
     try
     {
-        // Apply any pending migrations automatically
+        // Apply any pending migrations automatically in development
         await db.Database.MigrateAsync();
 
-        // Run the seeder (idempotent)
+        // Run the development seeder (idempotent; creates sample specializations, doctors, and patients)
         var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
         await seeder.SeedAsync();
     }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred during database initialization.");
+        logger.LogError(ex, "An error occurred during development database initialization.");
+    }
+}
+else if (!app.Environment.IsEnvironment("Testing"))
+{
+    // Production / Staging environment
+    using var scope = app.Services.CreateScope();
+    var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    // Safe, controlled database migrations in production: controlled by setting Database:MigrateOnStartup
+    var migrateOnStartup = configuration.GetValue<bool>("Database:MigrateOnStartup", false);
+    if (migrateOnStartup)
+    {
+        try
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            logger.LogInformation("Applying pending database migrations on startup (Database:MigrateOnStartup = true)...");
+            await db.Database.MigrateAsync();
+            logger.LogInformation("Database migrations applied successfully.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Fatal error: Failed to apply database migrations on startup.");
+            throw; // Fail-fast so Azure App Service reports deployment status accurately
+        }
+    }
+
+    // In production: only roles and the admin account are created, from App Settings Admin:Email and Admin:Password
+    try
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+        await seeder.SeedProductionAsync();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred during production roles/admin initialization.");
     }
 }
 
