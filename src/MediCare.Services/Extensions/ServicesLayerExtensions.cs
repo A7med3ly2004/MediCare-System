@@ -1,4 +1,5 @@
 using MediCare.Services.Account;
+using MediCare.Services.Admin;
 using MediCare.Services.Appointments;
 using MediCare.Services.Doctors;
 using MediCare.Services.Email;
@@ -6,6 +7,7 @@ using MediCare.Services.Interfaces;
 using MediCare.Services.MedicalRecords;
 using MediCare.Services.Notifications;
 using MediCare.Services.Otp;
+using MediCare.Services.Reports;
 using MediCare.Services.Schedule;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,8 @@ public static class ServicesLayerExtensions
         services.AddScoped<IScheduleService, ScheduleService>();
         services.AddScoped<IAppointmentService, AppointmentService>();
         services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+        services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IAdminManagementService, AdminManagementService>();
         services.AddHostedService<AppointmentReminderHostedService>();
 
         var sendGridKey = configuration["SendGrid:ApiKey"];
