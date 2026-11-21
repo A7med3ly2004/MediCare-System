@@ -27,6 +27,7 @@ public class DoctorDetailsViewModel
 {
     public DoctorDetailsDto Doctor { get; set; } = null!;
     public bool CanEditProfile { get; set; }
+    public bool IsOwner { get; set; }
     public DateOnly SelectedDate { get; set; }
     public bool IsAvailableOnSelectedDate { get; set; }
     public string FormattedConsultingHours { get; set; } = string.Empty;

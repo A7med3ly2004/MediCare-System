@@ -95,7 +95,8 @@ public class DoctorsController : Controller
         ViewData["ActiveNav"] = "doctors";
 
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var canEdit = User.IsInRole("Admin") || string.Equals(currentUserId, doctor.UserId, StringComparison.Ordinal);
+        var isOwner = !string.IsNullOrEmpty(currentUserId) && string.Equals(currentUserId, doctor.UserId, StringComparison.Ordinal);
+        var canEdit = User.IsInRole("Admin") || isOwner;
 
         var targetDate = date ?? DateOnly.FromDateTime(DateTime.UtcNow);
         var isAvail = await _doctorService.CheckDoctorAvailabilityAsync(doctor.Id, targetDate);
@@ -110,6 +111,7 @@ public class DoctorsController : Controller
         {
             Doctor = doctor,
             CanEditProfile = canEdit,
+            IsOwner = isOwner,
             SelectedDate = targetDate,
             IsAvailableOnSelectedDate = isAvail,
             FormattedConsultingHours = hoursStr
