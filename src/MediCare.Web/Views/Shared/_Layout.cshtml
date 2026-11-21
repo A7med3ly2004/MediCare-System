@@ -90,10 +90,6 @@
                        asp-controller="Doctor" asp-action="MedicalRecords">
                         <i class="bi bi-file-medical"></i> <span>Medical records</span>
                     </a>
-                    <a class="mc-nav-item text-muted opacity-50" style="cursor: not-allowed;" href="javascript:void(0)"
-                       title="Messaging is not part of this clinic release" data-bs-toggle="tooltip" aria-disabled="true">
-                        <i class="bi bi-chat"></i> <span>Messages</span>
-                    </a>
                     <a class="mc-nav-item @(ViewData["ActiveNav"]?.ToString() == "settings" ? "active" : "")"
                        asp-controller="Doctors" asp-action="Edit">
                         <i class="bi bi-gear"></i> <span>Settings</span>

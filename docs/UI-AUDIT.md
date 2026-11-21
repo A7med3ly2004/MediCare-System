@@ -50,6 +50,9 @@ In strict compliance with the **UI RULE** and **SPEC.md Out-of-Scope** constrain
    - *Resolution:* Saving a visit automatically transitions the appointment to `Completed` atomically without locking or multi-party signing workflows.
 4. **Ratings & Star Reviews:**  
    - *Audit Check:* Omitted all doctor rating stars and review submission forms as specified in SPEC.md.
+5. **Real-Time Messaging & Chat:**  
+   - *Audit Check:* The static mockup `UI/Doctor dashboard.png` displayed a `Messages` item in the Doctor sidebar.  
+   - *Resolution:* Real-time chat, instant messaging, and SignalR are explicitly out of scope per `docs/SPEC.md` and `AGENTS.md`. The `Messages` link and controller endpoint were completely removed so that only active, in-scope features (`Overview`, `My schedule`, `My patients`, `Medical records`, `Settings`) are presented.
 
 ---
 
