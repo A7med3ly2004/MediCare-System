@@ -162,6 +162,13 @@ input, button, select, textarea {
   flex-shrink: 0;
 }
 
+img.mc-brand-icon,
+img.mc-brand-icon-sm,
+img.mc-auth-logo-icon {
+  background: transparent !important;
+  object-fit: contain;
+}
+
 .mc-brand-name,
 .mc-sidebar__logo,
 .mc-sidebar__logo-text {
